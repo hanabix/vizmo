@@ -1,2 +1,4 @@
 .zcom*
 .zsh_history
+
+node_modules
