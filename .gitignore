@@ -2,3 +2,16 @@
 .zsh_history
 
 node_modules
+dist
+dist-ssr
+dev-dist
+*.local
+
+# Editor directories and files
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
