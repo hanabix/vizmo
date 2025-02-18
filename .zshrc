@@ -1,3 +1,5 @@
+source ~/.zshrc
+
 # NVM 配置
 export NVM_DIR="$(pwd)/.nvm"
 
