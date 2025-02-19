@@ -4,7 +4,7 @@ import { ref, onMounted } from 'vue'
 
 const devices = ref<BluetoothDevice[]>([])
 
-async function loadDevices() {
+async function load() {
   try {
     devices.value = await navigator.bluetooth.getDevices()
   } catch (error) {
@@ -13,7 +13,7 @@ async function loadDevices() {
   }
 }
 
-async function connectDevice() {
+async function request() {
   try {
     const device = await navigator.bluetooth.requestDevice({
       acceptAllDevices: true,
@@ -29,7 +29,7 @@ async function connectDevice() {
   }
 }
 
-onMounted(loadDevices)
+onMounted(load)
 </script>
 
 <template>
@@ -59,10 +59,10 @@ onMounted(loadDevices)
       </div>
 
       <!-- 添加新设备卡片 -->
-      <button @click="connectDevice" 
+      <button @click="request" 
               class="bg-white rounded-lg shadow p-4 flex items-center justify-center gap-2 hover:bg-gray-50">
         <span class="material-icons text-blue-500">add</span>
-        <span class="text-gray-700">连接新设备</span>
+        <span class="text-gray-700">添加设备</span>
       </button>
     </div>
   </main>
