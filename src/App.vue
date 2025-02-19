@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import PWABadge from './components/PWABadge.vue'
 import { ref, onMounted } from 'vue'
+import * as WitMotion from "./types/witmotion";
 
 const devices = ref<BluetoothDevice[]>([])
 
@@ -16,8 +17,9 @@ async function load() {
 async function request() {
   try {
     const device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: []
+      filters: [{
+        services: [WitMotion.WT9011DCL.SERVICE],
+      }],
     })
 
     if(devices.value.some(d => d.id === device.id))
