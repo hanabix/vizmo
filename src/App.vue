@@ -8,17 +8,22 @@ async function loadDevices() {
   try {
     devices.value = await navigator.bluetooth.getDevices()
   } catch (error) {
+    // chrome://flags/#enable-experimental-web-platform-features
     console.error('获取设备列表失败:', error)
   }
 }
 
 async function connectDevice() {
   try {
-    await navigator.bluetooth.requestDevice({
+    const device = await navigator.bluetooth.requestDevice({
       acceptAllDevices: true,
       optionalServices: []
     })
-    await loadDevices()
+
+    if(devices.value.some(d => d.id === device.id))
+      return
+
+    devices.value.push(device)
   } catch (error) {
     console.error('连接设备失败:', error)
   }
@@ -29,12 +34,12 @@ onMounted(loadDevices)
 
 <template>
   <nav class="fixed inset-x-0 top-0 z-50 bg-white p-4 shadow flex justify-between items-center">
-    <h1 class="text-xl font-bold text-gray-600 flex items-center gap-1">
-      <span class="material-icons text-blue-500">bluetooth</span>
+    <h1 class="text-xl font-bold text-gray-700 flex items-center gap-1">
+      <span class="material-icons text-blue-500">bluetooth_connected</span>
       WitMotion
     </h1>
     <button class="p-2 hover:bg-gray-100 flex items-center">
-      <span class="material-icons text-2xl text-gray-600">more_vert</span>
+      <span class="material-icons text-2xl text-gray-700">queue</span>
     </button>
   </nav>
 
@@ -44,13 +49,12 @@ onMounted(loadDevices)
       <div v-for="device in devices" :key="device.id" 
            class="bg-white rounded-lg shadow p-4 flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <span class="material-icons text-blue-500">bluetooth_connected</span>
           <div>
-            <h3 class="font-medium text-gray-800">{{ device.name || device.id }}</h3>
+            <h3 class="font-medium text-gray-700">{{ device.name || device.id }}</h3>
           </div>
         </div>
-        <button class="text-gray-600 hover:text-gray-800">
-          <span class="material-icons">more_horiz</span>
+        <button class="text-gray-700 hover:text-gray-900">
+          <span class="material-icons">more_vert</span>
         </button>
       </div>
 
@@ -58,7 +62,7 @@ onMounted(loadDevices)
       <button @click="connectDevice" 
               class="bg-white rounded-lg shadow p-4 flex items-center justify-center gap-2 hover:bg-gray-50">
         <span class="material-icons text-blue-500">add</span>
-        <span class="text-gray-600">连接新设备</span>
+        <span class="text-gray-700">连接新设备</span>
       </button>
     </div>
   </main>
