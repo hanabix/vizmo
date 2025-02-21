@@ -74,12 +74,7 @@ export function uint16(littleEndian?: boolean): Read<number> {
     if (data.byteLength < offset + 2) {
       return [undefined, offset]
     }
-    const low = data.getUint8(offset)
-    const high = data.getUint8(offset + 1)
-    return [(high << 8) | (low & 0xff), offset + 2]
-
-    
-    // return [data.getUint16(offset, littleEndian), offset + 2]
+    return [data.getUint16(offset, littleEndian), offset + 2]
   }
 }
 
