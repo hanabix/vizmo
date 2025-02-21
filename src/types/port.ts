@@ -16,10 +16,12 @@ export interface Writable<T> {
   set: (value: T) => Instruction
 }
 
+type Cancel = () => void
+
 export interface SerialPort {
   ask<T>(r: Readable<T>): Promise<T>
-  set<T>(w: Writable<T>, v: T): Promise<void>
-  watch<T>(f: Filter<T>, timeout: number): Promise<T[]>
+  set<T>(w: Writable<T>, value: T): Promise<void>
+  watch<T>(f: Filter<T>, onChanged: (value: T) => void): Cancel
 }
 
 export interface UUIDs {
@@ -51,16 +53,10 @@ export namespace SerialPort {
         setTimeout(() => reject(Error("timeout")), 1000)
         return promise
       },
-      async watch<T>(f: Filter<T>, timeout: number): Promise<T[]> {
-        const { promise, resolve } = Promise.withResolvers<T[]>()
-        const queue = Array.of<T>()
-        const listener = asListener(f, (v) => queue.push(v))
+      watch<T>(f: Filter<T>, onChanged: (value: T) => void): Cancel {
+        const listener = asListener(f, onChanged)
         rec.addEventListener('characteristicvaluechanged', listener)
-        setTimeout(() => {
-          rec.removeEventListener('characteristicvaluechanged', listener)
-          resolve(queue)
-        }, timeout)
-        return promise
+        return () => rec.removeEventListener('characteristicvaluechanged', listener)
       }
     }
 

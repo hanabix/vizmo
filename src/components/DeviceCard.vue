@@ -18,12 +18,9 @@ async function loadAgent() {
     const server = device.gatt
     if (!server.connected) await server.connect()
     const port = await SerialPort.of(server, WitMotion.WT9011DCL)
-    // const n = await port.ask(WitMotion.battery)
-    // console.log(n)
-    const ms = await port.watch(WitMotion.meters, 200)
-    for (const m of ms) {
-      console.log(m)
-    }
+    const n = await port.ask(WitMotion.battery)
+    console.log(n)
+    setTimeout(port.watch(WitMotion.meters, console.log), 200);
   }
 
 }
