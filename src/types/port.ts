@@ -3,9 +3,12 @@ import { type Read, any } from './read'
 export type Uint8 = number & { __uint8: never }
 export type Instruction = Uint8Array & { __instruction: never }
 
-export interface Readable<T> {
+export interface Filter<T> {
   read: Read<T>
   limit: number
+}
+
+export interface Readable<T> extends Filter<T> {
   get: Instruction
 }
 
@@ -16,6 +19,7 @@ export interface Writable<T> {
 export interface SerialPort {
   ask<T>(r: Readable<T>): Promise<T>
   set<T>(w: Writable<T>, v: T): Promise<void>
+  watch<T>(f: Filter<T>, timeout: number): Promise<T[]>
 }
 
 export interface UUIDs {
@@ -37,17 +41,27 @@ export namespace SerialPort {
         return snd.writeValue(w.set(v))
       },
       async ask<T>(r: Readable<T>): Promise<T> {
-        const { get, read, limit } = r
         const { promise, resolve, reject } = Promise.withResolvers<T>()
-        const listener = filter(read, limit, v => {
+        const listener = asListener(r, v => {
           rec.removeEventListener('characteristicvaluechanged', listener)
           resolve(v)
         })
         rec.addEventListener('characteristicvaluechanged', listener)
-        await snd.writeValue(get)
+        await snd.writeValue(r.get)
         setTimeout(() => reject(Error("timeout")), 1000)
         return promise
       },
+      async watch<T>(f: Filter<T>, timeout: number): Promise<T[]> {
+        const { promise, resolve } = Promise.withResolvers<T[]>()
+        const queue = Array.of<T>()
+        const listener = asListener(f, (v) => queue.push(v))
+        rec.addEventListener('characteristicvaluechanged', listener)
+        setTimeout(() => {
+          rec.removeEventListener('characteristicvaluechanged', listener)
+          resolve(queue)
+        }, timeout)
+        return promise
+      }
     }
 
   }
@@ -58,7 +72,8 @@ function getDataView(event: Event): DataView {
   return ch.value!
 }
 
-function filter<T>(read: Read<T>, limit: number, handle: (v: T) => void): EventListener {
+function asListener<T>(f: Filter<T>, handle: (v: T) => void): EventListener {
+  const { read, limit } = f
   return (event) => {
     const buf = getDataView(event)
     for (let offset = 0; offset < buf.byteLength;) {

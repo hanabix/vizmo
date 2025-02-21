@@ -1,6 +1,6 @@
 import type { Read } from './read'
-import { cons, map, fix, ignore, uint16 } from './read'
-import type { Uint8, Instruction, Readable, Writable, UUIDs } from './port'
+import { cons, map, fix, ignore, uint16, rep } from './read'
+import type { Uint8, Instruction, Readable, Writable, Filter, UUIDs } from './port'
 
 export const WT9011DCL: UUIDs = {
   service: '0000ffe5-0000-1000-8000-00805f9a34fb',
@@ -60,6 +60,10 @@ export enum Address {
 export type Triple = [number, number, number]
 export type Meters = [Triple, Triple, Triple]
 
+const SEGMENT = {
+  limit: 20
+}
+
 export const battery: Readable<number> = readable(
   0x64 as Uint8,
   map(cons(uint16(true), ignore(14)), ([v, _]) => v)
@@ -72,12 +76,27 @@ export const settings: Writable<Settings> = writable(
   0x00 as Uint8,
   (v: Settings) => v as Uint8
 )
+export const meters: Filter<Meters> = {
+  read: map(
+    cons(
+      fix(0x55, 0x61),
+      map(
+        rep(map(rep(uint16(true), 3), (v) => v as Triple), 3),
+        ([a, b, c]) => [acc(a), gyr(b), rot(c)] as Meters
+      )
+    ),
+    ([_, r]) => r
+  ),
+
+  ...SEGMENT
+}
+
 
 function readable<T>(addr: Uint8, read: Read<T>): Readable<T> {
   return {
     read: map(cons(fix(0x55, 0x71, addr, 0x00), read), ([_, v]) => v),
-    limit: 20, // bytes per segment
-    get: Uint8Array.of(0xFF, 0xAA, 0x27, addr, 0x00) as Instruction
+    get: Uint8Array.of(0xFF, 0xAA, 0x27, addr, 0x00) as Instruction,
+    ...SEGMENT
   }
 }
 
@@ -85,4 +104,16 @@ function writable<T>(addr: Uint8, convert: (value: T) => Uint8): Writable<T> {
   return {
     set: (v: T) => Uint8Array.of(0xFF, 0xAA, addr, convert(v), 0x00) as Instruction
   }
+}
+
+function acc(t: Triple): Triple {
+  return t.map(v => v / 32768.0 * 16) as Triple
+}
+
+function gyr(t: Triple): Triple {
+  return t.map(v => v / 32768.0 * 2000) as Triple
+}
+
+function rot(t: Triple): Triple {
+  return t.map(v => v / 32768.0 * 180) as Triple
 }
