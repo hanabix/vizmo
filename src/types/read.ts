@@ -55,17 +55,17 @@ export function cons<A, B>(ra: Read<A>, rb: Read<B>): Read<[A, B]> {
 
 export function rep<A>(ra: Read<A>, n: number): Read<A[]> {
   return (data, offset) => {
-    const result: A[] = []
+    const arr: A[] = []
     let o = offset
     for (let i = 0; i < n; i++) {
       const [v, n] = ra(data, o)
       if (v === undefined) {
         return [undefined, offset]
       }
-      result.push(v)
+      arr.push(v)
       o = n
     }
-    return [result, o]
+    return [arr, o]
   }
 }
 
