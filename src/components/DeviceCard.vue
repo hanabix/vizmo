@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue"
 import * as WitMotion from "../types/witmotion"
 import { SerialPort } from "../types/port"
+import BatteryIndicator from './BatteryIndicator.vue'
 
 const { device } = defineProps<{
   device: BluetoothDevice
@@ -37,27 +38,18 @@ onMounted(connect)
 
 <template>
   <div class="bg-white rounded-lg shadow p-4">
-    <div class="flex items-center justify-between mb-4">
-      <div>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
         <h3 class="font-medium text-gray-700">{{ device.name ?? device.id }}</h3>
-        <small class="text-sm text-gray-500">{{ firmware }}</small>
+        <BatteryIndicator :value="battery" />
       </div>
-      <div class="text-right">
-        <div class="flex items-center gap-1">
-          <span class="material-icons" :class="{
-            'text-green-500': battery >= 75,
-            'text-yellow-500': battery >= 25 && battery < 75,
-            'text-red-500': battery < 25
-          }">
-            {{ battery >= 90 ? 'battery_full' :
-               battery >= 75 ? 'battery_6_bar' :
-               battery >= 50 ? 'battery_4_bar' :
-               battery >= 25 ? 'battery_2_bar' :
-               'battery_alert' }}
-          </span>
-          <span class="text-gray-700">{{ battery }}%</span>
-        </div>
-      </div>
+      <button class="text-gray-700 hover:text-gray-900">
+        <span class="material-icons">more_vert</span>
+      </button>
+    </div>
+
+    <div class="mb-4">
+      <small class="text-sm text-gray-500">ver: {{ firmware }}</small>
     </div>
 
     <div class="grid grid-cols-3 gap-4">
@@ -88,8 +80,5 @@ onMounted(connect)
         </div>
       </div>
     </div>
-    <button class="text-gray-700 hover:text-gray-900">
-      <span class="material-icons">more_vert</span>
-    </button>
   </div>
 </template>
