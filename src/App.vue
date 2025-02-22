@@ -38,7 +38,7 @@ onMounted(load)
 <template>
   <nav class="fixed inset-x-0 top-0 z-50 bg-white p-4 shadow flex justify-between items-center">
     <h1 class="text-xl font-bold text-gray-700 flex items-center gap-1">
-      <span class="material-icons text-blue-500">bluetooth_connected</span>
+      <span class="material-icons text-blue-500">bluetooth</span>
       WitMotion
     </h1>
     <button class="p-2 hover:bg-gray-100 flex items-center">
@@ -55,7 +55,7 @@ onMounted(load)
       <!-- 添加新设备卡片 -->
       <button @click="request" 
               class="bg-white rounded-lg shadow p-4 flex items-center justify-center gap-2 hover:bg-gray-50">
-        <span class="material-icons text-blue-500">add</span>
+        <span class="material-icons text-blue-500">bluetooth_searching</span>
         <span class="text-gray-700">添加设备</span>
       </button>
     </div>
