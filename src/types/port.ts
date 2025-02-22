@@ -39,6 +39,7 @@ export interface UUIDs {
 
 export namespace SerialPort {
   export async function of(server: BluetoothRemoteGATTServer, uuids: UUIDs): Promise<SerialPort> {
+    if (!server.connected) await server.connect()
     const service = await server.getPrimaryService(uuids.service)
     const rec = await service.getCharacteristic(uuids.notify)
     const snd = await service.getCharacteristic(uuids.write)
