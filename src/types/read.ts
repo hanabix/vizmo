@@ -78,6 +78,15 @@ export function uint16(littleEndian?: boolean): Read<number> {
   }
 }
 
+export function uint8(): Read<number> {
+  return (data, offset) => {
+    if (data.byteLength < offset + 1) {
+      return [undefined, offset]
+    }
+    return [data.getUint8(offset), offset + 1]
+  }
+}
+
 export function fix(...bytes: number[]): Read<null> {
   return (data, offset) => {
     if (data.byteLength < offset + bytes.length) {

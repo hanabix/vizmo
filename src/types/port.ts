@@ -1,11 +1,18 @@
-import { type Read, any } from './read'
+import { type Read } from './read'
 
-export type Uint8 = number & { __uint8: never }
+export type Byte = number & { __uint8: never }
+export function byte(v: number): Byte {
+  if (v < 0 || v > 0xff) {
+    throw Error(`Illegal byte value ${v}`)
+  }
+  return v as Byte
+}
+
 export type Instruction = Uint8Array & { __instruction: never }
 
 export interface Filter<T> {
   read: Read<T>
-  limit: number
+  limit: Byte
 }
 
 export interface Readable<T> extends Filter<T> {
@@ -37,6 +44,7 @@ export namespace SerialPort {
     const snd = await service.getCharacteristic(uuids.write)
 
     rec.addEventListener('characteristicvaluechanged', debug)
+
     await rec.startNotifications()
     return {
       set<T>(w: Writable<T>, v: T): Promise<void> {

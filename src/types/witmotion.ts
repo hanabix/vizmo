@@ -1,6 +1,6 @@
-import type { Read } from './read'
-import { cons, map, fix, ignore, uint16, rep } from './read'
-import type { Uint8, Instruction, Readable, Writable, Filter, UUIDs } from './port'
+import { cons, map, fix, ignore, uint16, rep, uint8, type Read } from './read'
+import type { Byte, Instruction, Readable, Writable, Filter, UUIDs, SerialPort } from './port'
+import { byte } from './port'
 
 export const WT9011DCL: UUIDs = {
   service: '0000ffe5-0000-1000-8000-00805f9a34fb',
@@ -9,73 +9,71 @@ export const WT9011DCL: UUIDs = {
 }
 
 export enum Bandwidth {
-  Hz_256 = 0x00,
-  Hz_188 = 0x01,
-  Hz_98 = 0x02,
-  Hz_42 = 0x03,
-  Hz_20 = 0x04,
-  Hz_10 = 0x05,
-  Hz_5 = 0x06,
+  Hz_256 = byte(0x00),
+  Hz_188 = byte(0x01),
+  Hz_98 = byte(0x02),
+  Hz_42 = byte(0x03),
+  Hz_20 = byte(0x04),
+  Hz_10 = byte(0x05),
+  Hz_5 = byte(0x06),
 }
 
 export enum Orientation {
-  HORIZONTAL = 0x00,
-  VERTICAL = 0x01,
+  HORIZONTAL = byte(0x00),
+  VERTICAL = byte(0x01),
 }
 
 export enum OutputFormat {
-  INERTIA = 0x00,
-  POSITION = 0x01,
+  INERTIA = byte(0x00),
+  POSITION = byte(0x01),
 }
 
 export enum Rate {
-  Hz_01 = 0x01,
-  Hz_05 = 0x02,
-  Hz_1 = 0x03,
-  Hz_2 = 0x04,
-  Hz_5 = 0x05,
-  Hz_10 = 0x06,
-  Hz_20 = 0x07,
-  Hz_50 = 0x08,
-  Hz_100 = 0x09,
-  Hz_200 = 0x0B,
+  Hz_01 = byte(0x01),
+  Hz_05 = byte(0x02),
+  Hz_1 = byte(0x03),
+  Hz_2 = byte(0x04),
+  Hz_5 = byte(0x05),
+  Hz_10 = byte(0x06),
+  Hz_20 = byte(0x07),
+  Hz_50 = byte(0x08),
+  Hz_100 = byte(0x09),
+  Hz_200 = byte(0x0B),
 }
 
 export enum Settings {
-  SAVE = 0x00,
-  RESET = 0x01,
+  SAVE = byte(0x00),
+  RESET = byte(0x01),
 }
 
 export enum Address {
-  RATE = 0x03,
-  BANDWIDTH = 0x1F,
-  ORIENT = 0x23,
-  VERSION1 = 0x2E,
-  VERSION2 = 0x2F,
-  MAGNET = 0x3A,
-  QUATERNION = 0x51,
-  BATTERY = 0x64
+  RATE = byte(0x03),
+  BANDWIDTH = byte(0x1F),
+  ORIENT = byte(0x23),
+  VERSION1 = byte(0x2E),
+  VERSION2 = byte(0x2F),
+  MAGNET = byte(0x3A),
+  QUATERNION = byte(0x51),
+  BATTERY = byte(0x64)
 }
 
 export type Triple = [number, number, number]
 export type Meters = [Triple, Triple, Triple]
 
 const SEGMENT = {
-  limit: 20
+  limit: byte(20)
 }
 
 export const battery: Readable<number> = readable(
-  0x64 as Uint8,
-  map(cons(uint16(true), ignore(14)), ([v, _]) => v)
+  byte(0x64),
+  map(cons(uint16(true), ignore(14)), ([v, _]) => percent(v))
 )
-export const major: Readable<number> = readable(
-  0x2E as Uint8,
-  map(uint16(true), v => v)
-)
+
 export const settings: Writable<Settings> = writable(
-  0x00 as Uint8,
-  (v: Settings) => v as Uint8
+  byte(0x00),
+  (v: Settings) => byte(v)
 )
+
 export const meters: Filter<Meters> = {
   read: map(
     cons(
@@ -91,8 +89,35 @@ export const meters: Filter<Meters> = {
   ...SEGMENT
 }
 
+export async function askFirmware(port: SerialPort) {
+  const ver1: Readable<number[]> = readable(
+    byte(0x2E),
+    rep(uint8(), 2)
+  )
+  const ver2: Readable<number[]> = readable(
+    byte(0x2F),
+    rep(uint8(), 2)
+  )
+  const f = await port.ask(ver1)
+  const s = await port.ask(ver2)
+  const view = new DataView(Uint8Array.from(f.concat(s)).buffer)
+  return firmware(view)
+}
 
-function readable<T>(addr: Uint8, read: Read<T>): Readable<T> {
+function firmware(view: DataView): string {
+  let num = view.getUint32(0, true).toString(2)
+  if (num[0] === '1') {
+    const ma = parseInt(num.substring(2, 18), 2)
+    const mi = parseInt(num.substring(19, 24), 2)
+    const pa = parseInt(num.substring(25), 2)
+    return `${ma}.${mi}.${pa}`
+  } else {
+    return view.getUint16(0, true).toString()
+  }
+}
+
+
+function readable<T>(addr: Byte, read: Read<T>): Readable<T> {
   return {
     read: map(cons(fix(0x55, 0x71, addr, 0x00), read), ([_, v]) => v),
     get: Uint8Array.of(0xFF, 0xAA, 0x27, addr, 0x00) as Instruction,
@@ -100,7 +125,7 @@ function readable<T>(addr: Uint8, read: Read<T>): Readable<T> {
   }
 }
 
-function writable<T>(addr: Uint8, convert: (value: T) => Uint8): Writable<T> {
+function writable<T>(addr: Byte, convert: (value: T) => Byte): Writable<T> {
   return {
     set: (v: T) => Uint8Array.of(0xFF, 0xAA, addr, convert(v), 0x00) as Instruction
   }
@@ -117,3 +142,24 @@ function gyr(t: Triple): Triple {
 function rot(t: Triple): Triple {
   return t.map(v => v / 32768.0 * 180) as Triple
 }
+
+function percent(v: number): any {
+  const mapping = [
+    [396, 100],
+    [393, 90],
+    [387, 75],
+    [382, 60],
+    [379, 50],
+    [377, 40],
+    [373, 30],
+    [370, 20],
+    [368, 15],
+    [350, 10],
+    [340, 5]
+  ]
+  for (const [min, p] of mapping) {
+    if (v > min) return p
+  }
+  return 0
+}
+
