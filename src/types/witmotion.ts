@@ -23,7 +23,7 @@ export enum Orientation {
   VERTICAL = byte(0x01),
 }
 
-export enum OutputFormat {
+export enum MetersOutput {
   INERTIA = byte(0x00),
   POSITION = byte(0x01),
 }
@@ -46,16 +46,16 @@ export enum Settings {
   RESET = byte(0x01),
 }
 
-export enum Address {
-  RATE = byte(0x03),
-  BANDWIDTH = byte(0x1F),
-  ORIENT = byte(0x23),
-  VERSION1 = byte(0x2E),
-  VERSION2 = byte(0x2F),
-  MAGNET = byte(0x3A),
-  QUATERNION = byte(0x51),
-  BATTERY = byte(0x64)
-}
+// export enum Address {
+//   RATE = byte(0x03),
+//   BANDWIDTH = byte(0x1F),
+//   ORIENT = byte(0x23),
+//   VERSION1 = byte(0x2E),
+//   VERSION2 = byte(0x2F),
+//   MAGNET = byte(0x3A),
+//   QUATERNION = byte(0x51),
+//   BATTERY = byte(0x64)
+// }
 
 export type Triple = [number, number, number]
 export type Meters = [Triple, Triple, Triple]
@@ -101,21 +101,15 @@ export async function askFirmware(port: SerialPort) {
   const f = await port.ask(ver1)
   const s = await port.ask(ver2)
   const view = new DataView(Uint8Array.from(f.concat(s)).buffer)
-  return firmware(view)
-}
-
-function firmware(view: DataView): string {
-  let num = view.getUint32(0, true).toString(2)
-  if (num[0] === '1') {
-    const ma = parseInt(num.substring(2, 18), 2)
-    const mi = parseInt(num.substring(19, 24), 2)
-    const pa = parseInt(num.substring(25), 2)
-    return `${ma}.${mi}.${pa}`
-  } else {
-    return view.getUint16(0, true).toString()
+  if ((view.getUint8(1)) == 0x01) { // first bit is 1
+    const v = view.getUint32(0, true)
+    const major = v << 2 >> 16  // 2  ~ 18 
+    const minor = v << 18 >> 26 // 19 ~ 24 
+    const patch = v << 24 >> 24 // 25 ~ 32 
+    return `${major}.${minor}.${patch}`
   }
+  return view.getUint16(0, true).toString()
 }
-
 
 function readable<T>(addr: Byte, read: Read<T>): Readable<T> {
   return {
