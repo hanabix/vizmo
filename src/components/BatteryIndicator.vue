@@ -17,6 +17,6 @@ defineProps<{
          value >= 25 ? 'battery_2_bar' :
          'battery_1_bar' }}
     </span>
-    <span class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[8px] font-medium text-gray-700">{{ value }}</span>
+    <span class="absolute left-1/2 top-1/2 transform -translate-x-[calc(50%+1px)] -translate-y-1/2 text-[8px] font-medium text-gray-700">{{ value }}</span>
   </div>
 </template>

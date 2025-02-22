@@ -43,7 +43,7 @@ onMounted(connect)
         <h3 class="font-medium text-gray-700">{{ device.name ?? device.id }}</h3>
         <BatteryIndicator :value="battery" />
       </div>
-      <button class="text-gray-700 hover:text-gray-900">
+      <button class="text-gray-700 hover:text-gray-900 flex items-center">
         <span class="material-icons">more_vert</span>
       </button>
     </div>
