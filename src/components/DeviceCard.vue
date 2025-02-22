@@ -4,8 +4,9 @@ import * as WitMotion from "../types/witmotion"
 import { SerialPort } from "../types/port"
 import BatteryIndicator from './BatteryIndicator.vue'
 
-const { device } = defineProps<{
+const { device, remove } = defineProps<{
   device: BluetoothDevice
+  remove: () => void
 }>()
 
 const connecting = ref<boolean>(false)
@@ -45,8 +46,8 @@ onMounted(connect)
         <h3 class="font-medium text-gray-700">{{ device.name ?? device.id }}</h3>
         <BatteryIndicator :value="battery" />
       </div>
-      <button class="text-gray-700 hover:text-gray-900 flex items-center">
-        <span class="material-icons">more_vert</span>
+      <button @click="remove" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50" title="断开连接">
+        <span class="material-icons">bluetooth_disabled</span>
       </button>
     </div>
 

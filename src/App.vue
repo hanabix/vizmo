@@ -23,13 +23,18 @@ async function request() {
       }],
     })
 
-    if(devices.value.some(d => d.id === device.id))
+    if (devices.value.some(d => d.id === device.id))
       return
 
     devices.value.push(device)
   } catch (error) {
     console.error('连接设备失败:', error)
   }
+}
+
+function remove(device: BluetoothDevice) {
+  devices.value = devices.value.filter(d => d.id !== device.id)
+  if (device.gatt?.connected) device.gatt?.disconnect()
 }
 
 onMounted(load)
@@ -48,13 +53,11 @@ onMounted(load)
 
   <main class="container mx-auto p-4 mt-20">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <DeviceCard v-for="device in devices" 
-                  :key="device.id" 
-                  :device="device" />
+      <DeviceCard v-for="device in devices" :key="device.id" :device="device" :remove="() => remove(device)" />
 
       <!-- 添加新设备卡片 -->
-      <button @click="request" 
-              class="bg-white rounded-lg shadow p-4 flex items-center justify-center gap-2 hover:bg-gray-50">
+      <button @click="request"
+        class="bg-white rounded-lg shadow p-4 flex items-center justify-center gap-2 hover:bg-gray-50">
         <span class="material-icons text-blue-500">bluetooth_searching</span>
         <span class="text-gray-700">添加设备</span>
       </button>
