@@ -1,5 +1,35 @@
-# Vue 3 + TypeScript + Vite
+[WIP] A web console for wit-motion [BLE devices](https://wit-motion.yuque.com/wumwnr/docs/rwiclb).
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## Reference
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+- [Protocol](https://wit-motion.yuque.com/wumwnr/docs/ycui87fgg1mepk1u#cMiN1)
+- [SDK Example](https://github.com/WITMOTION/WitBluetooth_BWT901BLE5_0/blob/main/Android_Java/wit-example-ble5/WitSDK/src/main/java/com/wit/witsdk/Device/DeviceModel.java#L199)
+- [Communicating with Bluetooth devices over JavaScript](https://developer.chrome.com/docs/capabilities/bluetooth)
+
+## Some notes for zsh
+
+`source .zshrc` would help you to set up the node environment. 
+
+If you want auto load `.zshrc` with then vscode terminal, append the following to your `.vscode/settings.json`
+
+```json
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.profiles.osx": {
+    "zsh": {
+      "path": "/bin/zsh",
+      "args": [
+        "-l"
+      ]
+    },
+    "bash": {
+      "path": "/bin/zsh",
+      "args": [
+        "-l"
+      ]
+    }
+  },
+  "terminal.integrated.env.osx": {
+    "ZDOTDIR": "${workspaceFolder}"
+  }
+```
+
