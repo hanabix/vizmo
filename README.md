@@ -5,6 +5,7 @@
 - [Protocol](https://wit-motion.yuque.com/wumwnr/docs/ycui87fgg1mepk1u#cMiN1)
 - [SDK Example](https://github.com/WITMOTION/WitBluetooth_BWT901BLE5_0/blob/main/Android_Java/wit-example-ble5/WitSDK/src/main/java/com/wit/witsdk/Device/DeviceModel.java#L199)
 - [Communicating with Bluetooth devices over JavaScript](https://developer.chrome.com/docs/capabilities/bluetooth)
+- [Web Bluetooth Samples](https://googlechrome.github.io/samples/web-bluetooth/index.html)
 
 ## Some notes for zsh
 
