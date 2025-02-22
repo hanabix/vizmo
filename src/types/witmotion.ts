@@ -74,20 +74,10 @@ export const settings: Writable<Settings> = writable(
   (v: Settings) => byte(v)
 )
 
-export const meters: Filter<Meters> = {
-  read: map(
-    cons(
-      fix(0x55, 0x61),
-      map(
-        rep(map(rep(uint16(true), 3), (v) => v as Triple), 3),
-        ([a, b, c]) => [acc(a), gyr(b), rot(c)] as Meters
-      )
-    ),
-    ([_, r]) => r
-  ),
-
-  ...SEGMENT
-}
+export const meters: Filter<Meters> = filter(map(
+  rep(map(rep(uint16(true), 3), (v) => v as Triple), 3),
+  ([a, b, c]) => [acc(a), gyr(b), rot(c)] as Meters
+))
 
 export async function askFirmware(port: SerialPort) {
   const ver1: Readable<number[]> = readable(
@@ -122,6 +112,13 @@ function readable<T>(addr: Byte, read: Read<T>): Readable<T> {
 function writable<T>(addr: Byte, convert: (value: T) => Byte): Writable<T> {
   return {
     set: (v: T) => Uint8Array.of(0xFF, 0xAA, addr, convert(v), 0x00) as Instruction
+  }
+}
+
+function filter<T>(read: Read<T>): Filter<T> {
+  return {
+    read: map(cons(fix(0x55, 0x61), read), ([_, v]) => v),
+    ...SEGMENT
   }
 }
 
