@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue"
-import * as WitMotion from "../types/witmotion"
+import { agentOf, Rate, type Agent, type Meters, type Features, type Settings } from "../types/witmotion"
 import BatteryIndicator from './BatteryIndicator.vue'
 
 const { device, remove } = defineProps<{
@@ -9,22 +9,25 @@ const { device, remove } = defineProps<{
 }>()
 
 const connecting = ref<boolean>(false)
-const agentRef = ref<WitMotion.Agent | null>(null)
+const agentRef = ref<Agent<Features & Settings>>()
 const battery = ref<number>(0)
 const firmware = ref<string>('')
-const meters = ref<WitMotion.Meters>([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+const meters = ref<Meters>([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
 
 device.addEventListener('gattserverdisconnected', () => {
   console.log('Device disconnected')
-  agentRef.value = null
+  agentRef.value = undefined
 })
 
 async function connect() {
   connecting.value = true
   try {
-    const agent = await WitMotion.agentOf(device.gatt!)
+    const agent = await agentOf(device.gatt!)
     battery.value = await agent.get('battery')
     firmware.value = await agent.get('firmware')
+
+    
+    console.log(await agent.set('rate', Rate.Hz_1).then(r => Rate[r]))
     agent.watch((data) => meters.value = data)
 
     agentRef.value = agent

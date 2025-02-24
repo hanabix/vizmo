@@ -40,10 +40,10 @@ export enum Rate {
   Hz_200 = byte(0x0B),
 }
 
-export enum Settings {
-  SAVE = byte(0x00),
-  RESET = byte(0x01),
-}
+// export enum Settings {
+//   SAVE = byte(0x00),
+//   RESET = byte(0x01),
+// }
 
 // export enum Address {
 //   RATE = byte(0x03),
@@ -59,31 +59,37 @@ export enum Settings {
 export type Triple = [number, number, number]
 export type Meters = [Triple, Triple, Triple]
 
-type Feature = 'battery' | 'firmware'
-type Features = Record<Feature, Readable<any>>
+type Setting = 'rate' //| 'mode'
+export type Settings = Record<Setting, Writable<any>>
 
-type Value<F extends keyof Features> =
-  Features[F] extends Filter<any> ? ReturnType<Features[F]['read']>[0] :
-  Features[F] extends Compound<any> ? ReturnType<Features[F]['cons']> :
+type Feature = 'battery' | 'firmware' | Setting
+export type Features = Record<Feature, Readable<any>>
+
+
+type Val<T, K extends keyof T> =
+  T[K] extends Filter<any> ? Exclude<ReturnType<T[K]['read']>[0], undefined> :
+  T[K] extends Compound<any> ? ReturnType<T[K]['cons']> :
   never
 
-export interface Agent {
+export interface Agent<T extends Features & Settings> {
   watch: (rec: (ms: Meters) => void) => Cancel
-  get: <F extends Feature>(feat: F) => Promise<Value<F>>
+  get: <F extends Feature>(feat: F) => Promise<Val<T, F>>
+  set: <S extends Setting>(feat: S, v: Val<T, S>) => Promise<Val<T, S>>
 }
 
-export async function agentOf(server: BluetoothRemoteGATTServer): Promise<Agent> {
+export async function agentOf(server: BluetoothRemoteGATTServer): Promise<Agent<typeof props>> {
   const port = await SerialPort.of(server, WT9011DCL)
   return {
-    get: (f) => port.ask(feats[f]),
-    watch: (rec) => port.watch(meters, rec)
+    watch: (rec) => port.watch(meters, rec),
+    get: (f) => port.ask(props[f] as Readable<Val<typeof props, typeof f>>),
+    set: (s, v) => port.send(props[s], v).then(() => port.ask(props[s])) as Promise<Val<typeof props, typeof s>>
   }
 }
 
 const SEGMENT = { limit: 20 }
 
-const feats: Features = {
-  battery: simple(
+const props = {
+  battery: simple<number>(
     byte(0x64),
     map(cons(uint16(true), ignore(14)), ([v, _]) => percent(v))
   ),
@@ -97,7 +103,11 @@ const feats: Features = {
       }
       return view.getUint16(0, true).toString()
     }
-  } as Compound<string>
+  } as Compound<string>,
+  rate: {
+    ...simple<Rate>(byte(0x03), map(cons(uint8(), ignore(15)), ([v, _]) => v)),
+    ...writable<Rate>(byte(0x03), (v: Rate) => v as Byte)
+  } as Simple<Rate> & Writable<Rate>
 }
 
 const meters: Filter<Meters> = filter(map(
@@ -105,10 +115,10 @@ const meters: Filter<Meters> = filter(map(
   ([a, b, c]) => [acc(a), gyr(b), rot(c)] as Meters
 ))
 
-const settings: Writable<Settings> = writable(
-  byte(0x00),
-  (v: Settings) => byte(v)
-)
+// const settings: Writable<Settings> = writable(
+//   byte(0x00),
+//   (v: Settings) => byte(v)
+// )
 
 
 function simple<T>(addr: Byte, read: Read<T>): Simple<T> {
