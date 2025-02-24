@@ -1,6 +1,5 @@
 import { cons, map, fix, ignore, uint16, rep, uint8, type Read } from './read'
-import type { Byte, Instruction, Readable, Writable, Filter, UUIDs, SerialPort } from './port'
-import { byte } from './port'
+import type { Instruction, Readable, Writable, Filter, UUIDs, SerialPort } from './port'
 
 export const WT9011DCL: UUIDs = {
   service: '0000ffe5-0000-1000-8000-00805f9a34fb',
@@ -61,7 +60,7 @@ export type Triple = [number, number, number]
 export type Meters = [Triple, Triple, Triple]
 
 const SEGMENT = {
-  limit: byte(20)
+  limit: 20
 }
 
 export const battery: Readable<number> = readable(
@@ -154,3 +153,10 @@ function percent(v: number): any {
   return 0
 }
 
+type Byte = number & { __uint8: never }
+function byte(v: number): Byte {
+  if (v < 0 || v > 0xff) {
+    throw Error(`Illegal byte value ${v}`)
+  }
+  return v as Byte
+}

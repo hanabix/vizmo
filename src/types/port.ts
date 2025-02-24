@@ -1,18 +1,10 @@
 import { type Read } from './read'
 
-export type Byte = number & { __uint8: never }
-export function byte(v: number): Byte {
-  if (v < 0 || v > 0xff) {
-    throw Error(`Illegal byte value ${v}`)
-  }
-  return v as Byte
-}
-
 export type Instruction = Uint8Array & { __instruction: never }
 
 export interface Filter<T> {
   read: Read<T>
-  limit: Byte
+  limit: number
 }
 
 export interface Readable<T> extends Filter<T> {

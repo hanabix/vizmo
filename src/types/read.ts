@@ -1,11 +1,5 @@
 export type Read<T> = (data: DataView, offset: number) => [T | undefined, number]
 
-export function pass(): Read<DataView> {
-  return (data, offset) => {
-    return [data, offset]
-  }
-}
-
 export function ignore(n: number): Read<null> {
   return (data, offset) => {
     if (data.byteLength < offset + n) {
@@ -22,18 +16,6 @@ export function map<A, B>(ra: Read<A>, f: (v: A) => B): Read<B> {
       return [undefined, offset]
     }
     return [f(v), n]
-  }
-}
-
-export function any<A>(...ras: Read<A>[]): Read<A> {
-  return (data, offset) => {
-    for (const ra of ras) {
-      const [v, n] = ra(data, offset)
-      if (v !== undefined) {
-        return [v, n]
-      }
-    }
-    return [undefined, offset]
   }
 }
 

@@ -1,17 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { pass, ignore, map, any, cons, rep, uint16, fix } from './read'
+import { ignore, map, cons, rep, uint16, fix } from './read'
 
 describe('read', () => {
   const createDataView = (bytes: number[]) => new DataView(new Uint8Array(bytes).buffer)
-
-  describe('pass', () => {
-    it('should return data and offset as is', () => {
-      const data = createDataView([1, 2, 3])
-      const [result, offset] = pass()(data, 0)
-      expect(result).toBe(data)
-      expect(offset).toBe(0)
-    })
-  })
 
   describe('ignore', () => {
     it('should ignore n bytes and return null', () => {
@@ -41,30 +32,6 @@ describe('read', () => {
     it('should return undefined when inner reader fails', () => {
       const data = createDataView([1])
       const reader = map(uint16(), x => x * 2)
-      const [result, offset] = reader(data, 0)
-      expect(result).toBe(undefined)
-      expect(offset).toBe(0)
-    })
-  })
-
-  describe('any', () => {
-    it('should return first successful read', () => {
-      const data = createDataView([1, 2, 3])
-      const reader = any(
-        fix(2),
-        fix(1)
-      )
-      const [result, offset] = reader(data, 0)
-      expect(result).toBe(null)
-      expect(offset).toBe(1)
-    })
-
-    it('should return undefined when all readers fail', () => {
-      const data = createDataView([3])
-      const reader = any(
-        fix(1),
-        fix(2)
-      )
       const [result, offset] = reader(data, 0)
       expect(result).toBe(undefined)
       expect(offset).toBe(0)
