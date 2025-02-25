@@ -62,18 +62,18 @@ onMounted(connect)
         <div class="bg-gray-50 p-3 rounded">
           <h4 class="text-sm font-medium text-gray-600 mb-2">加速度</h4>
           <div class="text-xs text-gray-500">
-            <div>X: {{ meters[0][0].toFixed(2) }}</div>
-            <div>Y: {{ meters[0][1].toFixed(2) }}</div>
-            <div>Z: {{ meters[0][2].toFixed(2) }}</div>
+            <div>X: {{ meters[0][0].toFixed(2) }}g</div>
+            <div>Y: {{ meters[0][1].toFixed(2) }}g</div>
+            <div>Z: {{ meters[0][2].toFixed(2) }}g</div>
           </div>
         </div>
 
         <div class="bg-gray-50 p-3 rounded">
           <h4 class="text-sm font-medium text-gray-600 mb-2">陀螺仪</h4>
           <div class="text-xs text-gray-500">
-            <div>X: {{ meters[1][0].toFixed(2) }}</div>
-            <div>Y: {{ meters[1][1].toFixed(2) }}</div>
-            <div>Z: {{ meters[1][2].toFixed(2) }}</div>
+            <div>X: {{ meters[1][0].toFixed(2) }}°/s</div>
+            <div>Y: {{ meters[1][1].toFixed(2) }}°/s</div>
+            <div>Z: {{ meters[1][2].toFixed(2) }}°/s</div>
           </div>
         </div>
 
