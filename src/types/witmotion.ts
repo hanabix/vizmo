@@ -1,4 +1,4 @@
-import { cons, map, fix, ignore, uint16, rep, uint8, type Read } from './read'
+import { cons, map, fix, ignore, short, rep, uint8, type Read } from './read'
 import { type Cancel, type Instruction, type Readable, type Simple, type Compound, type Writable, type Filter, type UUIDs, SerialPort } from './port'
 
 export const WT9011DCL: UUIDs = {
@@ -91,7 +91,7 @@ const SEGMENT = { limit: 20 }
 const props = {
   battery: simple<number>(
     byte(0x64),
-    map(cons(uint16(true), ignore(14)), ([v, _]) => percent(v))
+    map(cons(short(true), ignore(14)), ([v, _]) => percent(v))
   ),
   firmware: {
     batch: [simple(byte(0x2E), rep(uint8(), 2)), simple(byte(0x2F), rep(uint8(), 2))],
@@ -111,7 +111,7 @@ const props = {
 }
 
 const meters: Filter<Meters> = filter(map(
-  rep(map(rep(uint16(true), 3), (v) => v as Triple), 3),
+  rep(map(rep(short(true), 3), (v) => v as Triple), 3),
   ([a, b, c]) => [acc(a), gyr(b), rot(c)] as Meters
 ))
 

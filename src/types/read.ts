@@ -51,12 +51,12 @@ export function rep<A>(ra: Read<A>, n: number): Read<A[]> {
   }
 }
 
-export function uint16(littleEndian?: boolean): Read<number> {
+export function short(littleEndian?: boolean): Read<number> {
   return (data, offset) => {
     if (data.byteLength < offset + 2) {
       return [undefined, offset]
     }
-    return [data.getUint16(offset, littleEndian), offset + 2]
+    return [data.getInt16(offset, littleEndian), offset + 2]
   }
 }
 
