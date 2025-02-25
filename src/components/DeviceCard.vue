@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue"
 import * as WitMotion from "../types/witmotion"
-import { SerialPort } from "../types/port"
 import BatteryIndicator from './BatteryIndicator.vue'
 
 const { device, remove } = defineProps<{
@@ -10,25 +9,25 @@ const { device, remove } = defineProps<{
 }>()
 
 const connecting = ref<boolean>(false)
-const portRef = ref<SerialPort | null>(null)
+const agentRef = ref<WitMotion.Agent | null>(null)
 const battery = ref<number>(0)
 const firmware = ref<string>('')
 const meters = ref<WitMotion.Meters>([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
 
 device.addEventListener('gattserverdisconnected', () => {
   console.log('Device disconnected')
-  portRef.value = null
+  agentRef.value = null
 })
 
 async function connect() {
   connecting.value = true
   try {
-    const port = await SerialPort.of(device.gatt!, WitMotion.WT9011DCL)
-    battery.value = await port.ask(WitMotion.battery)
-    firmware.value = await WitMotion.askFirmware(port)
-    port.watch(WitMotion.meters, (data) => meters.value = data)
-  
-    portRef.value = port
+    const agent = await WitMotion.agentOf(device.gatt!)
+    battery.value = await agent.get('battery')
+    firmware.value = await agent.get('firmware')
+    agent.watch((data) => meters.value = data)
+
+    agentRef.value = agent
   } catch (error) {
     console.error('连接设备失败:', error)
   } finally {
@@ -40,7 +39,7 @@ onMounted(connect)
 </script>
 
 <template>
-  <div v-if="portRef" class="bg-white rounded-lg shadow p-4 flex flex-col">
+  <div v-if="agentRef" class="bg-white rounded-lg shadow p-4 flex flex-col">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <h3 class="font-medium text-gray-700">{{ device.name ?? device.id }}</h3>
@@ -87,20 +86,17 @@ onMounted(connect)
     </div>
   </div>
 
-  <button v-else 
-      @click="connect" 
-      :disabled="connecting"
-      class="bg-white rounded-lg shadow p-4 flex flex-col w-full"
-      :class="{ 'hover:bg-gray-50': !connecting }">
-      <div class="flex items-center justify-between">
-        <h3 class="font-medium text-gray-700">{{ device.name ?? device.id }}</h3>
-      </div>
-      <div class="mt-4 flex-1 flex items-center justify-center gap-2">
-        <span class="material-icons text-blue-500" :class="{ 'animate-spin': connecting }">
-          {{ connecting ? 'sync' : 'bluetooth_searching' }}
-        </span>
-        <span class="text-gray-700">{{ connecting ? '连接中...' : '尝试重连' }}</span>
-      </div>
-    </button>
+  <button v-else @click="connect" :disabled="connecting" class="bg-white rounded-lg shadow p-4 flex flex-col w-full"
+    :class="{ 'hover:bg-gray-50': !connecting }">
+    <div class="flex items-center justify-between">
+      <h3 class="font-medium text-gray-700">{{ device.name ?? device.id }}</h3>
+    </div>
+    <div class="mt-4 flex-1 flex items-center justify-center gap-2">
+      <span class="material-icons text-blue-500" :class="{ 'animate-spin': connecting }">
+        {{ connecting ? 'sync' : 'bluetooth_searching' }}
+      </span>
+      <span class="text-gray-700">{{ connecting ? '连接中...' : '尝试重连' }}</span>
+    </div>
+  </button>
 
 </template>

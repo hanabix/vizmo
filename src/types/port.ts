@@ -7,19 +7,26 @@ export interface Filter<T> {
   limit: number
 }
 
-export interface Readable<T> extends Filter<T> {
+export interface Simple<T> extends Filter<T> {
   get: Instruction
 }
+
+export interface Compound<T> {
+  batch: Simple<number[]>[]
+  cons: (view: DataView) => T
+}
+
+export type Readable<T> = Simple<T> | Compound<T>
 
 export interface Writable<T> {
   set: (value: T) => Instruction
 }
 
-type Cancel = () => void
+export type Cancel = () => void
 
 export interface SerialPort {
   ask<T>(r: Readable<T>): Promise<T>
-  set<T>(w: Writable<T>, value: T): Promise<void>
+  send<T>(w: Writable<T>, value: T): Promise<void>
   watch<T>(f: Filter<T>, onChanged: (value: T) => void): Cancel
 }
 
@@ -40,19 +47,33 @@ export namespace SerialPort {
 
     await rec.startNotifications()
     return {
-      set<T>(w: Writable<T>, v: T): Promise<void> {
+      send<T>(w: Writable<T>, v: T): Promise<void> {
         return snd.writeValue(w.set(v))
       },
       async ask<T>(r: Readable<T>): Promise<T> {
-        const { promise, resolve, reject } = Promise.withResolvers<T>()
-        const listener = asListener(r, v => {
-          rec.removeEventListener('characteristicvaluechanged', listener)
-          resolve(v)
-        })
-        rec.addEventListener('characteristicvaluechanged', listener)
-        await snd.writeValue(r.get)
-        setTimeout(() => reject(Error("timeout")), 1000)
-        return promise
+        async function ask0<T>(s: Simple<T>): Promise<T> {
+          const { promise, resolve, reject } = Promise.withResolvers<T>()
+          const listener = asListener(s, v => {
+            rec.removeEventListener('characteristicvaluechanged', listener)
+            resolve(v)
+          })
+          rec.addEventListener('characteristicvaluechanged', listener)
+          await snd.writeValue(s.get)
+          setTimeout(() => reject(Error("timeout")), 1000)
+          return promise
+        }
+
+        if ('batch' in r) {
+          const { batch, cons } = r as Compound<T>
+          let arr: number[] = []
+          for (const r of batch) {
+            arr = arr.concat((await ask0(r)))
+          }
+
+          return cons(new DataView(new Uint8Array(arr).buffer))
+        }
+
+        return ask0(r as Simple<T>)
       },
       watch<T>(f: Filter<T>, onChanged: (value: T) => void): Cancel {
         const listener = asListener(f, onChanged)

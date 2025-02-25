@@ -1,5 +1,5 @@
 import { cons, map, fix, ignore, uint16, rep, uint8, type Read } from './read'
-import type { Instruction, Readable, Writable, Filter, UUIDs, SerialPort } from './port'
+import { type Cancel, type Instruction, type Readable, type Simple, type Compound, type Writable, type Filter, type UUIDs, SerialPort } from './port'
 
 export const WT9011DCL: UUIDs = {
   service: '0000ffe5-0000-1000-8000-00805f9a34fb',
@@ -59,48 +59,59 @@ export enum Settings {
 export type Triple = [number, number, number]
 export type Meters = [Triple, Triple, Triple]
 
-const SEGMENT = {
-  limit: 20
+type Feature = 'battery' | 'firmware'
+type Features = Record<Feature, Readable<any>>
+
+type Value<F extends keyof Features> =
+  Features[F] extends Filter<any> ? ReturnType<Features[F]['read']>[0] :
+  Features[F] extends Compound<any> ? ReturnType<Features[F]['cons']> :
+  never
+
+export interface Agent {
+  watch: (rec: (ms: Meters) => void) => Cancel
+  get: <F extends Feature>(feat: F) => Promise<Value<F>>
 }
 
-export const battery: Readable<number> = readable(
-  byte(0x64),
-  map(cons(uint16(true), ignore(14)), ([v, _]) => percent(v))
-)
+export async function agentOf(server: BluetoothRemoteGATTServer): Promise<Agent> {
+  const port = await SerialPort.of(server, WT9011DCL)
+  return {
+    get: (f) => port.ask(feats[f]),
+    watch: (rec) => port.watch(meters, rec)
+  }
+}
 
-export const settings: Writable<Settings> = writable(
-  byte(0x00),
-  (v: Settings) => byte(v)
-)
+const SEGMENT = { limit: 20 }
 
-export const meters: Filter<Meters> = filter(map(
+const feats: Features = {
+  battery: simple(
+    byte(0x64),
+    map(cons(uint16(true), ignore(14)), ([v, _]) => percent(v))
+  ),
+  firmware: {
+    batch: [simple(byte(0x2E), rep(uint8(), 2)), simple(byte(0x2F), rep(uint8(), 2))],
+    cons: (view: DataView) => {
+      if ((view.getUint8(1)) == 0x01) { // first bit is 1
+        const v = view.getUint32(0, true)
+        //             2  ~ 18          19  ~ 24         25  ~ 32
+        return `${v << 2 >> 16}.${v << 18 >> 26}.${v << 24 >> 24}`
+      }
+      return view.getUint16(0, true).toString()
+    }
+  } as Compound<string>
+}
+
+const meters: Filter<Meters> = filter(map(
   rep(map(rep(uint16(true), 3), (v) => v as Triple), 3),
   ([a, b, c]) => [acc(a), gyr(b), rot(c)] as Meters
 ))
 
-export async function askFirmware(port: SerialPort) {
-  const ver1: Readable<number[]> = readable(
-    byte(0x2E),
-    rep(uint8(), 2)
-  )
-  const ver2: Readable<number[]> = readable(
-    byte(0x2F),
-    rep(uint8(), 2)
-  )
-  const f = await port.ask(ver1)
-  const s = await port.ask(ver2)
-  const view = new DataView(Uint8Array.from(f.concat(s)).buffer)
-  if ((view.getUint8(1)) == 0x01) { // first bit is 1
-    const v = view.getUint32(0, true)
-    const major = v << 2 >> 16  // 2  ~ 18 
-    const minor = v << 18 >> 26 // 19 ~ 24 
-    const patch = v << 24 >> 24 // 25 ~ 32 
-    return `${major}.${minor}.${patch}`
-  }
-  return view.getUint16(0, true).toString()
-}
+const settings: Writable<Settings> = writable(
+  byte(0x00),
+  (v: Settings) => byte(v)
+)
 
-function readable<T>(addr: Byte, read: Read<T>): Readable<T> {
+
+function simple<T>(addr: Byte, read: Read<T>): Simple<T> {
   return {
     read: map(cons(fix(0x55, 0x71, addr, 0x00), read), ([_, v]) => v),
     get: Uint8Array.of(0xFF, 0xAA, 0x27, addr, 0x00) as Instruction,

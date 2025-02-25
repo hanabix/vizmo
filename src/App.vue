@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import PWABadge from './components/PWABadge.vue'
 import DeviceCard from './components/DeviceCard.vue'
-import { ref, onMounted } from 'vue'
-import * as WitMotion from "./types/witmotion"
+import { WT9011DCL } from "./types/witmotion"
 
 const devices = ref<BluetoothDevice[]>([])
 
@@ -19,7 +19,7 @@ async function request() {
   try {
     const device = await navigator.bluetooth.requestDevice({
       filters: [{
-        services: [WitMotion.WT9011DCL.service],
+        services: [WT9011DCL.service],
       }],
     })
 
