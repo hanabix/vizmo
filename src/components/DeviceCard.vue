@@ -49,7 +49,7 @@ onMounted(connect)
         <h3 class="font-medium text-gray-700">{{ device.name ?? device.id }}</h3>
         <DeviceInfo v-if="agentRef" :battery="battery" :firmware="firmware" />
       </div>
-      <button v-if="agentRef" @click="remove" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 flex items-center" title="断开连接">
+      <button v-if="!connecting" @click="remove" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 flex items-center" title="断开连接">
         <span class="material-icons">bluetooth_disabled</span>
       </button>
     </div>
