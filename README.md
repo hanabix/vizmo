@@ -1,17 +1,19 @@
-[WIP] A web console for wit-motion [BLE devices](https://wit-motion.yuque.com/wumwnr/docs/rwiclb).
+[WIP] Wit Motion 低功耗蓝牙设备的 Web 控制台， 目前支持：
 
-## Reference
+- [*] [WT9011DCL](https://wit-motion.yuque.com/wumwnr/docs/rwiclb)
 
-- [Protocol](https://wit-motion.yuque.com/wumwnr/docs/ycui87fgg1mepk1u#cMiN1)
-- [SDK Example](https://github.com/WITMOTION/WitBluetooth_BWT901BLE5_0/blob/main/Android_Java/wit-example-ble5/WitSDK/src/main/java/com/wit/witsdk/Device/DeviceModel.java#L199)
-- [Communicating with Bluetooth devices over JavaScript](https://developer.chrome.com/docs/capabilities/bluetooth)
+## 相关参考
+
+- [蓝牙协议](https://wit-motion.yuque.com/wumwnr/docs/ycui87fgg1mepk1u#cMiN1)
+- [SDK 参考代码](https://github.com/WITMOTION/WitBluetooth_BWT901BLE5_0/blob/main/Android_Java/wit-example-ble5/WitSDK/src/main/java/com/wit/witsdk/Device/DeviceModel.java#L199)
+- [通过 JavaScript 与蓝牙设备通信](https://developer.chhttps://developer.chrome.com/docs/capabilities/bluetooth?hl=zh-cn)
 - [Web Bluetooth Samples](https://googlechrome.github.io/samples/web-bluetooth/index.html)
 
-## Some notes for zsh
+## Zsh 用户小贴士
 
-`source .zshrc` would help you to set up the node environment. 
+`source .zshrc` 能自动配置项目独立的 node 环境。
 
-If you want auto load `.zshrc` with then vscode terminal, append the following to your `.vscode/settings.json`
+若希望与 VS Code 终端集成，可将如下内容添加至 `.vscode/settings.json`：
 
 ```json
   "terminal.integrated.defaultProfile.osx": "zsh",
