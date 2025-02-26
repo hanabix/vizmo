@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue"
 import { agentOf, Rate, type Agent, type Meters, type Features, type Settings } from "../types/witmotion"
-import BatteryIndicator from './BatteryIndicator.vue'
+import DeviceInfo from './DeviceInfo.vue'
 import MetersPanel from './MetersPanel.vue'
 
 const { device, remove } = defineProps<{
@@ -43,31 +43,21 @@ onMounted(connect)
 </script>
 
 <template>
-  <div v-if="agentRef" class="bg-white rounded-lg shadow p-4 flex flex-col">
+  <div class="bg-white rounded-lg shadow p-4 flex flex-col" :class="{'animate-pulse': connecting}">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <h3 class="font-medium text-gray-700">{{ device.name ?? device.id }}</h3>
-        <BatteryIndicator :value="battery" />
-        <small class="text-xs text-gray-500">{{ firmware }}</small>
+        <DeviceInfo v-if="agentRef" :battery="battery" :firmware="firmware" />
       </div>
-      <button @click="remove" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50" title="断开连接">
+      <button v-if="agentRef" @click="remove" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50" title="断开连接">
         <span class="material-icons">bluetooth_disabled</span>
       </button>
     </div>
-
-    <MetersPanel :meters="meters" />
+    
+    <MetersPanel v-if="agentRef" :meters="meters" />
+    <button v-else @click="connect" class="text-blue-500 animate-ping p-1 rounded-full hover:bg-red-50" title="重新连接">
+      <span class="material-icons">link</span>
+    </button>
   </div>
 
-  <button v-else @click="connect" :disabled="connecting" class="bg-white rounded-lg shadow p-4 flex flex-col w-full"
-    :class="{ 'hover:bg-gray-50': !connecting }">
-    <div class="flex items-center justify-between">
-      <h3 class="font-medium text-gray-700">{{ device.name ?? device.id }}</h3>
-    </div>
-    <div class="mt-4 flex-1 flex items-center justify-center gap-2">
-      <span class="material-icons text-blue-500" :class="{ 'animate-spin': connecting }">
-        {{ connecting ? 'sync' : 'bluetooth_searching' }}
-      </span>
-      <span class="text-gray-700">{{ connecting ? '连接中...' : '尝试重连' }}</span>
-    </div>
-  </button>
 </template>
