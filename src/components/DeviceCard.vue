@@ -43,20 +43,20 @@ onMounted(connect)
 </script>
 
 <template>
-  <div class="bg-white rounded-lg shadow p-4 flex flex-col" :class="{'animate-pulse': connecting}">
+  <div class="bg-white rounded-lg shadow p-4 flex flex-col">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <h3 class="font-medium text-gray-700">{{ device.name ?? device.id }}</h3>
         <DeviceInfo v-if="agentRef" :battery="battery" :firmware="firmware" />
       </div>
-      <button v-if="agentRef" @click="remove" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50" title="断开连接">
+      <button v-if="agentRef" @click="remove" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 flex items-center" title="断开连接">
         <span class="material-icons">bluetooth_disabled</span>
       </button>
     </div>
     
     <DeviceMeters v-if="agentRef" :meters="meters" />
-    <button v-else @click="connect" class="text-blue-500 animate-ping p-1 rounded-full hover:bg-red-50" title="重新连接">
-      <span class="material-icons">link</span>
+    <button v-else @click="connect" :disabled="connecting" class="text-blue-500 mt-4 p-1 rounded-lg hover:bg-gray-50 flex items-center justify-center" title="重新连接">
+      <span class="material-icons" :class="{'animate-ping': connecting}">link</span>
     </button>
   </div>
 
