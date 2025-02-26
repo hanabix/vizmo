@@ -2,7 +2,7 @@
 import { ref, onMounted } from "vue"
 import { agentOf, Rate, type Agent, type Meters, type Features, type Settings } from "../types/witmotion"
 import DeviceInfo from './DeviceInfo.vue'
-import MetersPanel from './MetersPanel.vue'
+import DeviceMeters from './DeviceMeters.vue'
 
 const { device, remove } = defineProps<{
   device: BluetoothDevice
@@ -54,7 +54,7 @@ onMounted(connect)
       </button>
     </div>
     
-    <MetersPanel v-if="agentRef" :meters="meters" />
+    <DeviceMeters v-if="agentRef" :meters="meters" />
     <button v-else @click="connect" class="text-blue-500 animate-ping p-1 rounded-full hover:bg-red-50" title="重新连接">
       <span class="material-icons">link</span>
     </button>
