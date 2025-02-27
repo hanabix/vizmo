@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ignore, map, cons, rep, short, fix } from './read'
+import { ignore, map, cons, rep, short, fix } from './'
 
 describe('read', () => {
   const createDataView = (bytes: number[]) => new DataView(new Uint8Array(bytes).buffer)

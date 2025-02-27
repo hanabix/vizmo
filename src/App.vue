@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import PWABadge from './components/PWABadge.vue'
 import DeviceCard from './components/DeviceCard.vue'
-import { WT9011DCL } from "./types/witmotion"
+import { WT9011DCL } from "./modules/wit-motion"
 
 const devices = ref<BluetoothDevice[]>([])
 

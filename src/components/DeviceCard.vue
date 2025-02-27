@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue"
-import { agentOf, Rate, type Agent, type Meters, type Features, type Settings } from "../types/witmotion"
+import type { Agent,  Meters,  Features,  Settings } from "../modules/wit-motion"
+import {agentOf, Rate} from "../modules/wit-motion"
 import DeviceInfo from './DeviceInfo.vue'
 import DeviceMeters from './DeviceMeters.vue'
 
@@ -28,7 +29,6 @@ async function connect() {
     firmware.value = await agent.get('firmware')
 
     console.log(await agent.get('rate').then(r => Rate[r]))
-    // console.log(await agent.set('rate', Rate.Hz_1).then(r => Rate[r]))
     agent.watch((data) => meters.value = data)
 
     agentRef.value = agent
