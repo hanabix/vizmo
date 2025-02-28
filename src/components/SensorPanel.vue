@@ -53,7 +53,7 @@ onMounted(connect)
       </button>
     </div>
 
-    <Simulator v-if="sensorRef" v-bind="sensorRef" class="mt-4"/>
+    <Simulator v-if="sensorRef" v-bind="{observe: sensorRef.watch}" class="mt-4"/>
     <button v-else @click="connect" :disabled="connecting"
       class="text-blue-500 mt-4 p-1 rounded-lg hover:bg-gray-50 flex items-center justify-center" title="重新连接">
       <span class="material-icons" :class="{ 'animate-ping': connecting }">link</span>
