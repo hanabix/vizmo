@@ -1,7 +1,70 @@
-import type { Compound, Instruction, Simple, Writable } from "../port"
+import type { Compound, Instruction, Readable, Simple, Writable } from "../port"
 import { cons, fix, ignore, map, rep, short, uint8, type Read } from "../read"
-import { SEGMENT } from "./constants"
-import { byte, type Byte, type Rate } from "./types"
+import segment from "./segment"
+
+export type Setting = 'rate' //| 'mode'
+export type Settings = Record<Setting, Writable<any>>
+
+export type Feature = 'battery' | 'firmware' | Setting
+export type Features = Record<Feature, Readable<any>>
+
+export type Byte = number & { __uint8: never }
+export function byte(v: number): Byte {
+  if (v < 0 || v > 0xff) {
+    throw Error(`Illegal byte value ${v}`)
+  }
+  return v as Byte
+}
+
+export enum Bandwidth {
+  Hz_256 = byte(0x00),
+  Hz_188 = byte(0x01),
+  Hz_98 = byte(0x02),
+  Hz_42 = byte(0x03),
+  Hz_20 = byte(0x04),
+  Hz_10 = byte(0x05),
+  Hz_5 = byte(0x06),
+}
+
+export enum Orientation {
+  HORIZONTAL = byte(0x00),
+  VERTICAL = byte(0x01),
+}
+
+export enum MetersOutput {
+  INERTIA = byte(0x00),
+  POSITION = byte(0x01),
+}
+
+export enum Rate {
+  Hz_01 = byte(0x01),
+  Hz_05 = byte(0x02),
+  Hz_1 = byte(0x03),
+  Hz_2 = byte(0x04),
+  Hz_5 = byte(0x05),
+  Hz_10 = byte(0x06),
+  Hz_20 = byte(0x07),
+  Hz_50 = byte(0x08),
+  Hz_100 = byte(0x09),
+  Hz_200 = byte(0x0B),
+}
+
+// export enum Settings {
+//   SAVE = byte(0x00),
+//   RESET = byte(0x01),
+// }
+
+// export enum Address {
+//   RATE = byte(0x03),
+//   BANDWIDTH = byte(0x1F),
+//   ORIENT = byte(0x23),
+//   VERSION1 = byte(0x2E),
+//   VERSION2 = byte(0x2F),
+//   MAGNET = byte(0x3A),
+//   QUATERNION = byte(0x51),
+//   BATTERY = byte(0x64)
+// }
+
 
 export default {
   battery: simple<number>(
@@ -29,7 +92,7 @@ function simple<T>(addr: Byte, read: Read<T>): Simple<T> {
   return {
     read: map(cons(fix(0x55, 0x71, addr, 0x00), read), ([_, v]) => v),
     get: Uint8Array.of(0xFF, 0xAA, 0x27, addr, 0x00) as Instruction,
-    ...SEGMENT
+    ...segment
   }
 }
 

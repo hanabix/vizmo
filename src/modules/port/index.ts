@@ -2,12 +2,12 @@ import { type Read } from '../read'
 
 export type Instruction = Uint8Array & { __instruction: never }
 
-export interface Filter<T> {
+export interface SegmentFilter<T> {
   read: Read<T>
   limit: number
 }
 
-export interface Simple<T> extends Filter<T> {
+export interface Simple<T> extends SegmentFilter<T> {
   get: Instruction
 }
 
@@ -27,7 +27,7 @@ export type Cancel = () => void
 export interface SerialPort {
   ask<T>(r: Readable<T>): Promise<T>
   send<T>(w: Writable<T>, value: T): Promise<void>
-  watch<T>(f: Filter<T>, onChanged: (value: T) => void): Cancel
+  watch<T>(f: SegmentFilter<T>, onChanged: (value: T) => void): Cancel
 }
 
 export interface UUIDs {
@@ -36,13 +36,13 @@ export interface UUIDs {
   write: string
 }
 
-export default async function (server: BluetoothRemoteGATTServer, uuids: UUIDs): Promise<SerialPort> {
+export default async function portFrom(server: BluetoothRemoteGATTServer, uuids: UUIDs): Promise<SerialPort> {
   if (!server.connected) await server.connect()
   const service = await server.getPrimaryService(uuids.service)
   const rec = await service.getCharacteristic(uuids.notify)
   const snd = await service.getCharacteristic(uuids.write)
 
-  rec.addEventListener('characteristicvaluechanged', debug)
+  // rec.addEventListener('characteristicvaluechanged', debug)
 
   await rec.startNotifications()
   return {
@@ -88,7 +88,7 @@ function getDataView(event: Event): DataView {
   return ch.value!
 }
 
-function asListener<T>(f: Filter<T>, handle: (v: T) => void): EventListener {
+function asListener<T>(f: SegmentFilter<T>, handle: (v: T) => void): EventListener {
   const { read, limit } = f
   return (event) => {
     const buf = getDataView(event)
@@ -105,22 +105,22 @@ function asListener<T>(f: Filter<T>, handle: (v: T) => void): EventListener {
   }
 }
 
+function concat(a: Uint8Array<ArrayBuffer>, b: Uint8Array<ArrayBuffer>): Uint8Array<ArrayBuffer> {
+  const result = new Uint8Array(a.length + b.length);
+  result.set(a, 0);
+  result.set(b, a.length);
+  return result;
+}
+
 const debug: EventListener = (event) => {
+  function hex(buf: Uint8Array<ArrayBufferLike>) {
+    return Array.from(buf).map(b => b.toString(16).padStart(2, '0')).join(' ')
+  }
+
   const buf = new Uint8Array(getDataView(event).buffer)
   if (buf[1] == 0x61) { // negative data
     // ignore
     return
   }
   console.log(`Raw bytes (${buf.byteLength})`, hex(buf))
-}
-
-function hex(buf: Uint8Array<ArrayBufferLike>) {
-  return Array.from(buf).map(b => b.toString(16).padStart(2, '0')).join(' ')
-}
-
-function concat(a: Uint8Array<ArrayBuffer>, b: Uint8Array<ArrayBuffer>): Uint8Array<ArrayBuffer> {
-  const result = new Uint8Array(a.length + b.length);
-  result.set(a, 0);
-  result.set(b, a.length);
-  return result;
 }
