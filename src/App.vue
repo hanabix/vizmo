@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import PWABadge from './components/PWABadge.vue'
-import DeviceCard from './components/DeviceCard.vue'
+import Sensor from './components/SensorPanel.vue'
 import { WT9011DCL } from "./modules/wit-motion"
 
 const devices = ref<BluetoothDevice[]>([])
@@ -53,7 +53,7 @@ onMounted(load)
 
   <main class="container mx-auto p-4 mt-20">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <DeviceCard v-for="device in devices" :key="device.id" :device="device" :remove="() => remove(device)" />
+      <Sensor v-for="device in devices" :key="device.id" :device="device" :remove="() => remove(device)" />
 
       <!-- 添加新设备卡片 -->
       <button @click="request"

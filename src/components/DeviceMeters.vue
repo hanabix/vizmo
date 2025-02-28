@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import type { Meters } from "../modules/wit-motion"
+import { ref, onMounted } from 'vue'
+import type { Meters, Sensor, Features, Settings } from "../modules/wit-motion"
+import VSensor from './VSimulator.vue'
 
-defineProps<{
-  meters: Meters
-}>()
+const agent = defineProps<Sensor<Features & Settings>>()
 
-function fixed(n: number): string {
-  return `\t${n.toFixed(2)}`
-}
+const meters = ref<Meters>([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+
+
+onMounted(() => {
+  agent.watch((data) => meters.value = data)
+})
 </script>
 
 <template>
   <div class="mt-4">
-    <div class="grid grid-cols-3 gap-4">
+    <!-- <div class="grid grid-cols-3 gap-4">
       <div class="bg-gray-50 p-3 rounded">
         <h4 class="text-sm font-medium text-gray-600 mb-2">加速度</h4>
         <div class="text-xs text-gray-500">
@@ -39,6 +42,9 @@ function fixed(n: number): string {
           <div>Z: {{ fixed(meters[2][2]) }}°</div>
         </div>
       </div>
-    </div>
+    </div> -->
+
+      <VSensor v-bind="agent" class="mx-0" />
   </div>
+
 </template>
