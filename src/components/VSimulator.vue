@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as THREE from 'three'
-import type { Meters, Sensor, Features, Settings } from '../modules/wit-motion'
+import type { Meters } from '../modules/wit-motion'
 
 interface Cavas {
   refresh: (meters: Meters) => void,
@@ -9,14 +9,22 @@ interface Cavas {
   dispose: () => void
 }
 
-const sensor = defineProps<Sensor<Features & Settings>>()
+interface Cancel {
+  (): void
+}
+
+interface Observeable  {
+  observe: (callback: (meters: Meters) => void) => Cancel
+}
+
+const source = defineProps<Observeable>()
 const containerRef = ref<HTMLDivElement | null>(null)
 
 onMounted(() => {
-  if (!containerRef.value) return
+  if (!containerRef.value) throw new Error('containerRef is null')
 
   const { refresh, resize, dispose } = init(containerRef.value)
-  const cancel = sensor.watch(refresh)
+  const cancel = source.observe(refresh)
   window.addEventListener('resize', () => resize())
   onBeforeUnmount(() => {
     cancel()
