@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Meters } from "../types/witmotion"
+import type { Meters } from "../modules/wit-motion"
 
 defineProps<{
   meters: Meters
