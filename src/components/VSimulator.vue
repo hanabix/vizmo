@@ -24,34 +24,28 @@ onMounted(() => {
   })
 })
 
-
 function init(root: HTMLDivElement): Cavas {
-
-  // 创建场景
   const scene = new THREE.Scene()
   scene.background = new THREE.Color(0xf9fafb)
 
-  // 创建相机
+  const mesh = box()
+  scene.add(mesh)
+  
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
+  scene.add(ambientLight)
+  
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
+  directionalLight.position.set(1, 1, 1)
+  scene.add(directionalLight)
+
   const width = root.clientWidth
   const height = root.clientHeight
   const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000)
   camera.position.z = 5
 
-  // 创建渲染器
   const renderer = new THREE.WebGLRenderer({ antialias: true })
   renderer.setSize(width, height)
   root.appendChild(renderer.domElement)
-
-  const mesh = box()
-  scene.add(mesh)
-
-  // 添加环境光和定向光
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
-  scene.add(ambientLight)
-
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
-  directionalLight.position.set(1, 1, 1)
-  scene.add(directionalLight)
 
   renderer.setAnimationLoop(() => {
     renderer.render(scene, camera)
@@ -59,8 +53,6 @@ function init(root: HTMLDivElement): Cavas {
 
   return {
     refresh: (data: Meters) => {
-      if (!mesh) return
-
       mesh.rotation.set(0, 0, 0)
       const [x, y, z] = data[2].map(angle => angle * Math.PI / 180)
       mesh.rotation.set(y, z, x, 'YXZ')
@@ -89,24 +81,17 @@ function init(root: HTMLDivElement): Cavas {
 }
 
 function box() {
-  const geometry = new THREE.BoxGeometry(1.5, 0.5, 1); // 扁平的长方体
+  const geometry = new THREE.BoxGeometry(1.5, 0.5, 1); 
 
   function basic(color: number) {
     return new THREE.MeshBasicMaterial({ color });
   }
 
   const top = basic(0x008fcb);
-  const back = basic(0xDEDEDE);
+  const back = basic(0xdedede);
   const side = basic(0x252728);
 
-  const materials = [
-    side, // 右面
-    back, // 左面
-    top, // 顶面 (+y)
-    side, // 底面
-    side, // 前面
-    side // 后面
-  ];
+  const materials = [side, back, top, side, side, side];
 
   return new THREE.Mesh(geometry, materials);
 }
