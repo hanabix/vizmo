@@ -42,7 +42,19 @@ export default async function portFrom(server: BluetoothRemoteGATTServer, uuids:
   const rec = await service.getCharacteristic(uuids.notify)
   const snd = await service.getCharacteristic(uuids.write)
 
-  // rec.addEventListener('characteristicvaluechanged', debug)
+  // below code for debug
+  // rec.addEventListener('characteristicvaluechanged', ((event) => {
+  //     function hex(buf: Uint8Array<ArrayBufferLike>) {
+  //       return Array.from(buf).map(b => b.toString(16).padStart(2, '0')).join(' ')
+  //     }
+
+  //     const buf = new Uint8Array(getDataView(event).buffer)
+  //     if (buf[1] == 0x61) { // negative data
+  //       // ignore
+  //       return
+  //     }
+  //     console.log(`Raw bytes (${buf.byteLength})`, hex(buf))
+  //   }))
 
   await rec.startNotifications()
   return {
@@ -112,15 +124,3 @@ function concat(a: Uint8Array<ArrayBuffer>, b: Uint8Array<ArrayBuffer>): Uint8Ar
   return result;
 }
 
-const debug: EventListener = (event) => {
-  function hex(buf: Uint8Array<ArrayBufferLike>) {
-    return Array.from(buf).map(b => b.toString(16).padStart(2, '0')).join(' ')
-  }
-
-  const buf = new Uint8Array(getDataView(event).buffer)
-  if (buf[1] == 0x61) { // negative data
-    // ignore
-    return
-  }
-  console.log(`Raw bytes (${buf.byteLength})`, hex(buf))
-}
