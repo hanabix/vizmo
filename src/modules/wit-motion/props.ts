@@ -9,7 +9,7 @@ export default {
     map(cons(short(true), ignore(14)), ([v, _]) => percent(v))
   ),
   firmware: {
-    batch: [simple(byte(0x2E), rep(uint8(), 2)), simple(byte(0x2F), rep(uint8(), 2))],
+    batch: [simple(byte(0x2E), bytes(2)), simple(byte(0x2F), bytes(2))],
     cons: (view: DataView) => {
       if ((view.getUint8(1)) == 0x01) { // first bit is 1
         const v = view.getUint32(0, true)
@@ -60,4 +60,6 @@ function percent(v: number): any {
   return 0
 }
 
-
+function bytes(n: number): Read<Uint8Array> {
+  return map(rep(uint8(), n), (arr) => Uint8Array.from(arr))
+}

@@ -12,7 +12,7 @@ export interface Simple<T> extends Filter<T> {
 }
 
 export interface Compound<T> {
-  batch: Simple<number[]>[]
+  batch: Simple<Uint8Array<ArrayBuffer>>[]
   cons: (view: DataView) => T
 }
 
@@ -63,12 +63,12 @@ export default async function (server: BluetoothRemoteGATTServer, uuids: UUIDs):
 
       if ('batch' in r) {
         const { batch, cons } = r as Compound<T>
-        let arr: number[] = []
+        let bytes = Uint8Array.of()
         for (const r of batch) {
-          arr = arr.concat((await ask0(r)))
+          bytes = concat(bytes, await ask0(r))
         }
 
-        return cons(new DataView(new Uint8Array(arr).buffer))
+        return cons(new DataView(bytes.buffer))
       }
 
       return ask0(r as Simple<T>)
@@ -118,3 +118,9 @@ function hex(buf: Uint8Array<ArrayBufferLike>) {
   return Array.from(buf).map(b => b.toString(16).padStart(2, '0')).join(' ')
 }
 
+function concat(a: Uint8Array<ArrayBuffer>, b: Uint8Array<ArrayBuffer>): Uint8Array<ArrayBuffer> {
+  const result = new Uint8Array(a.length + b.length);
+  result.set(a, 0);
+  result.set(b, a.length);
+  return result;
+}
