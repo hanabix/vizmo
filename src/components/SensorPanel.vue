@@ -3,7 +3,9 @@ import { ref, onMounted } from "vue"
 import type { Sensor, Features, Settings } from "../modules/wit-motion"
 import { sensorFrom, Rate } from "../modules/wit-motion"
 import Status from './SensorStatus.vue'
-import Simulator from './VSimulator.vue'
+import Meters from './SensorMeters.vue'
+import Indicator from './SensorIndicator.vue'
+import Record from './SensorRecord.vue'
 
 const { device, remove } = defineProps<{
   device: BluetoothDevice
@@ -53,7 +55,12 @@ onMounted(connect)
       </button>
     </div>
 
-    <Simulator v-if="sensorRef" v-bind="{observe: sensorRef.watch}" class="mt-4"/>
+    <div v-if="sensorRef">
+      <Indicator v-bind="{ observe: sensorRef.watch }" class="mt-4" />
+      <Meters v-bind="{ observe: sensorRef.watch }" class="mt-4" />
+      <Record v-bind="{ observe: sensorRef.watch }" class="mt-4" />
+    </div>
+
     <button v-else @click="connect" :disabled="connecting"
       class="text-blue-500 mt-4 p-1 rounded-lg hover:bg-gray-50 flex items-center justify-center" title="重新连接">
       <span class="material-icons" :class="{ 'animate-ping': connecting }">link</span>
