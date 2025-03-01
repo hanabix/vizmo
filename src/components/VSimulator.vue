@@ -103,9 +103,9 @@ function box(scene: THREE.Scene, width: number, height: number, depth: number): 
   const geometry = new THREE.BoxGeometry(width, height, depth)
   const mesh = new THREE.Mesh(geometry, materials)
 
-  const wcb = arrow(mesh, new THREE.Vector3(1, 0, 0), 0x00ff00, width)
-  const hcb = arrow(mesh, new THREE.Vector3(0, 1, 0), 0x0000ff, height)
-  const dcb = arrow(mesh, new THREE.Vector3(0, 0, 1), 0xff0000, depth)
+  const faE = forceArrow(mesh, new THREE.Vector3(0, 0, 1), 0xff0000, depth)
+  const faN = forceArrow(mesh, new THREE.Vector3(1, 0, 0), 0x00ff00, width)
+  const faS = forceArrow(mesh, new THREE.Vector3(0, 1, 0), 0x0000ff, height)
 
   scene.add(mesh)
   return {
@@ -115,9 +115,9 @@ function box(scene: THREE.Scene, width: number, height: number, depth: number): 
       mesh.rotation.set(radian(y), radian(z), radian(x), 'YXZ')
     },
     force: (x: number, y: number, z: number) => {
-      wcb(y)
-      hcb(z)
-      dcb(x)
+      faE(x)
+      faN(y)
+      faS(z)
     },
     dispose: () => {
       geometry.dispose()
@@ -129,7 +129,7 @@ function box(scene: THREE.Scene, width: number, height: number, depth: number): 
     }
   }
 
-  function arrow(
+  function forceArrow(
     mesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshBasicMaterial[], THREE.Object3DEventMap>,
     dir: THREE.Vector3,
     color: THREE.ColorRepresentation,
