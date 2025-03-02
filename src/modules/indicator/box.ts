@@ -27,7 +27,10 @@ export default function box(width: number, height: number, depth: number): Attac
   const faS = forceArrow(new Vector3(0, 1, 0), 0x0000ff, height).attach(mesh)
 
   const indicator: Indicator = {
-    rotate: (e) => { mesh.rotation.copy(e) },
+    rotate: ({ x, y, z, order }) => {
+      mesh.rotation.set(0, 0, 0)
+      mesh.rotation.set(x, y, z, order)
+    },
     force: ({ x, y, z }) => {
       faE(x)
       faN(y)
