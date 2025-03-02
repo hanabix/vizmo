@@ -5,7 +5,6 @@ import { sensorFrom, Rate } from "../modules/wit-motion"
 import Status from './SensorStatus.vue'
 import Meters from './SensorMeters.vue'
 import Indicator from './SensorIndicator.vue'
-import Record from './SensorRecord.vue'
 
 const { device, remove } = defineProps<{
   device: BluetoothDevice
@@ -58,7 +57,6 @@ onMounted(connect)
     <div v-if="sensorRef">
       <Indicator v-bind="{ observe: sensorRef.watch }" class="mt-4" />
       <Meters v-bind="{ observe: sensorRef.watch }" class="mt-4" />
-      <Record v-bind="{ observe: sensorRef.watch }" class="mt-4" />
     </div>
 
     <button v-else @click="connect" :disabled="connecting"
