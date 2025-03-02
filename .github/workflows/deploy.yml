@@ -40,6 +40,8 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          VITE_GITHUB_URL: ${{ github.server_url }}/${{ github.repository }}
         run: npm run build
 
       - name: Setup Pages

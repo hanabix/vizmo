@@ -28,4 +28,6 @@ jobs:
         run: npm test
 
       - name: Build
+        env:
+          VITE_GITHUB_URL: ${{ github.server_url }}/${{ github.repository }}
         run: npm run build

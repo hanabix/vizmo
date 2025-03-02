@@ -4,6 +4,11 @@ import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_GITHUB_URL': JSON.stringify(
+      process.env.VITE_GITHUB_URL || '#'
+    )
+  },
   base: './',
   plugins: [
     tailwindcss(),
@@ -18,9 +23,9 @@ export default defineConfig({
       },
 
       manifest: {
-        name: 'WitMotion BLE',
-        short_name: 'wble',
-        description: 'Manage low energy bluetooth devices of WitMotion',
+        name: 'Vizmo',
+        short_name: 'vizmo',
+        description: 'Visualization of IMU in realtime or replay',
         theme_color: '#0000FF',
       },
 

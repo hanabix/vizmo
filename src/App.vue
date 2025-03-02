@@ -44,7 +44,7 @@ onMounted(load)
   <nav class="fixed inset-x-0 top-0 z-50 bg-white p-4 shadow flex justify-between items-center">
     <h1 class="text-xl font-bold text-gray-700 flex items-center gap-1">
       <span class="material-icons text-blue-500">bluetooth</span>
-      WitMotion
+      Vizmo
     </h1>
     <button v-if="devices.length > 0" class="p-2 hover:bg-gray-100 flex items-center" title="多选">
       <span class="material-icons-outlined text-2xl text-gray-700">library_add_check</span>

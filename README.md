@@ -1,4 +1,4 @@
-[WIP] Wit Motion 低功耗蓝牙设备的 Web 控制台， 目前支持：
+[WIP] 目前支持 IMU 蓝牙设备的：
 
 - [x] [WT9011DCL](https://wit-motion.yuque.com/wumwnr/docs/rwiclb)
 
