@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import PWABadge from './components/PWABadge.vue'
 import Sensor from './components/SensorPanel.vue'
+import GitHubCorner from './components/GitHubCorner.vue'
 import { WT9011DCL } from "./modules/wit-motion"
 
 const devices = ref<BluetoothDevice[]>([])
@@ -62,6 +63,7 @@ onMounted(load)
   </main>
 
   <PWABadge />
+  <GitHubCorner />
 </template>
 
 <style scoped></style>
