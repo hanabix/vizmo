@@ -46,9 +46,6 @@ onMounted(load)
       <span class="material-icons text-blue-500">bluetooth</span>
       Vizmo
     </h1>
-    <button v-if="devices.length > 0" class="p-2 hover:bg-gray-100 flex items-center" title="多选">
-      <span class="material-icons-outlined text-2xl text-gray-700">library_add_check</span>
-    </button>
   </nav>
 
   <main class="container mx-auto p-4 mt-20">
