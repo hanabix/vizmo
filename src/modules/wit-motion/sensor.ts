@@ -15,6 +15,8 @@ export interface Sensor<T extends Features & Settings> {
   set: <S extends Setting>(setting: S, value: Val<T, S>) => Promise<Val<T, S>>
 }
 
+export type ReadOnlySensor = Pick<Sensor<Features & Settings>, 'get'>
+
 export async function sensorFrom(server: BluetoothRemoteGATTServer): Promise<Sensor<typeof props>> {
   const port = await portOf(server, WT9011DCL)
   return {

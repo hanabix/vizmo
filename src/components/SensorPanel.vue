@@ -10,7 +10,6 @@ const { device, remove } = defineProps<{
   device: BluetoothDevice
   remove: () => void
 }>()
-
 const connecting = ref<boolean>(false)
 const sensorRef = ref<Sensor<Features & Settings>>()
 const battery = ref<number>(0)
@@ -46,7 +45,9 @@ onMounted(connect)
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <h3 class="font-medium text-gray-700">{{ device.name ?? device.id }}</h3>
-        <Status v-if="sensorRef" :battery="battery" :firmware="firmware" />
+        <Suspense v-if="sensorRef">
+          <Status v-bind="sensorRef" />
+        </Suspense>
       </div>
       <button v-if="!connecting" @click="remove"
         class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 flex items-center" title="断开连接">
