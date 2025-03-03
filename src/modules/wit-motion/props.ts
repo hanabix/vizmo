@@ -102,6 +102,21 @@ function writable<T>(addr: Byte, convert: (value: T) => Byte): Writable<T> {
   }
 }
 
+export function hz(rate: Rate) {
+  if (rate === Rate.Hz_01) return 0.1
+  if (rate === Rate.Hz_05) return 0.5
+  if (rate === Rate.Hz_2) return 2
+  if (rate === Rate.Hz_1) return 1
+  if (rate === Rate.Hz_5) return 5
+  if (rate === Rate.Hz_10) return 10
+  if (rate === Rate.Hz_20) return 20
+  if (rate === Rate.Hz_50) return 50
+  if (rate === Rate.Hz_100) return 50
+  if (rate === Rate.Hz_200) return 50
+  throw new Error(`unknown rate: ${rate}`)
+}
+
+
 
 function percent(v: number): any {
   const mapping = [

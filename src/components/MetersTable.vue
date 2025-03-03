@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import type { EventSource } from '../types'
-import type { Meters } from '../modules/wit-motion'
+import { inject } from 'vue'
+import Key from './key'
+import { complain } from '../modules/utils'
 
 const meters = [
   { label: '加速计', unit: ' g ' },
@@ -15,13 +15,7 @@ const axis = [
   { label: 'Z(天)', color: 'blue' }
 ]
 
-const source = defineProps<EventSource<Meters>>()
-const data = ref<Meters>([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
-
-onMounted(() => {
-  const cancel = source.observe((v) => { data.value = v })
-  onBeforeUnmount(() => { cancel() })
-})
+const data = inject(Key.meters) ?? complain('failed to inject metersRef')
 
 </script>
 
@@ -30,8 +24,7 @@ onMounted(() => {
     <thead class="bg-gray-50">
       <tr>
         <th class="px-2 py-1 font-medium text-gray-500"></th>
-        <th v-for="{ label, color } in axis" class="px-2 py-1 text-right font-medium"
-          :class="`text-${color}-500`">
+        <th v-for="{ label, color } in axis" class="px-2 py-1 text-right font-medium" :class="`text-${color}-500`">
           {{ label }}</th>
       </tr>
     </thead>
@@ -43,4 +36,4 @@ onMounted(() => {
       </tr>
     </tbody>
   </table>
-</template>
+</template>./keys./key
