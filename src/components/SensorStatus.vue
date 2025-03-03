@@ -1,8 +1,10 @@
 <script setup lang="ts">
-defineProps<{
-  battery: number
-  firmware: string
-}>()
+import type { ReadOnlySensor } from "../modules/wit-motion"
+
+const sensor = defineProps<ReadOnlySensor>()
+const battery =  await sensor.get('battery')
+const firmware = await sensor.get('firmware')
+
 </script>
 
 <template>
