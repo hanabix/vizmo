@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { ReadOnlySensor } from "../modules/wit-motion"
+import type { ReadonlySensor } from "../modules/wit-motion"
 
-const sensor = defineProps<ReadOnlySensor>()
+const sensor = defineProps<ReadonlySensor>()
 const battery =  await sensor.get('battery')
 const firmware = await sensor.get('firmware')
 
