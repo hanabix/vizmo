@@ -1,4 +1,5 @@
-import { type Read } from '../read'
+import type { Cancel } from '../types'
+import type { Read } from '../read'
 
 export type Instruction = Uint8Array & { __instruction: never }
 
@@ -21,8 +22,6 @@ export type Readable<T> = Simple<T> | Compound<T>
 export interface Writable<T> {
   set: (value: T) => Instruction
 }
-
-export type Cancel = () => void
 
 export interface SerialPort {
   ask<T>(r: Readable<T>): Promise<T>

@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { ref, type Component, onErrorCaptured } from 'vue'
+import { ref, type Component, onErrorCaptured, provide } from 'vue'
+import cacheBy from './modules/cache'
+import createIndicator from './modules/indicator'
+import Key from './components/key'
 
 import PWABadge from './components/PWABadge.vue'
 import GitHubCorner from './components/GitHubCorner.vue'
@@ -22,6 +25,8 @@ onErrorCaptured((err, instance, info) => {
   console.error(err, instance, info)
   return false
 })
+
+provide(Key.indicators, cacheBy(createIndicator))
 </script>
 
 <template>

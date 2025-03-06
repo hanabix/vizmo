@@ -1,14 +1,16 @@
 
 import { AmbientLight, Color, DirectionalLight, Euler, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from 'three'
+import type { Canvas } from '../types'
 import box from './box'
 
-interface Cavas {
-  refresh: (acc: Vector3, euler: Euler) => void,
-  resize: () => void,
+export interface Indicator extends Canvas<[Vector3, Euler]> {
+  react: (data: [Vector3, Euler]) => void,
+  resize: (width: number, height: number) => void,
   dispose: () => void
+  dom: HTMLElement
 }
 
-export default function attach(root: HTMLDivElement): Cavas {
+export default function attach(width: number, height: number): Indicator {
   const scene = new Scene()
   scene.background = new Color(0xf9fafb)
 
@@ -21,34 +23,28 @@ export default function attach(root: HTMLDivElement): Cavas {
   directionalLight.position.set(1, 1, 1)
   scene.add(directionalLight)
 
-  const width = root.clientWidth
-  const height = root.clientHeight
   const camera = new PerspectiveCamera(50, width / height, 0.1, 1000)
   camera.position.z = 5
 
   const renderer = new WebGLRenderer({ antialias: true })
   renderer.setSize(width, height)
-  root.appendChild(renderer.domElement)
 
   renderer.setAnimationLoop(() => {
     renderer.render(scene, camera)
   })
 
   return {
-    refresh: (acc, euler) => {
+    dom: renderer.domElement,
+    react: ([acc, euler]) => {
       rotate(euler)
       force(acc)
     },
-    resize: () => {
-      const width = root.clientWidth
-      const height = root.clientHeight
-
+    resize: (width, height) => {
       camera.aspect = width / height
       camera.updateProjectionMatrix()
       renderer.setSize(width, height)
     },
     dispose: () => {
-      root.removeChild(renderer.domElement)
       dispose()
       renderer.dispose()
     }
