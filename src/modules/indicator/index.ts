@@ -3,14 +3,9 @@ import { AmbientLight, Color, DirectionalLight, Euler, PerspectiveCamera, Scene,
 import type { Canvas } from '../types'
 import box from './box'
 
-export interface Indicator extends Canvas<[Vector3, Euler]> {
-  react: (data: [Vector3, Euler]) => void,
-  resize: (width: number, height: number) => void,
-  dispose: () => void
-  dom: HTMLElement
-}
+export type Indicator = Canvas<[Vector3, Euler]>
 
-export default function attach(width: number, height: number): Indicator {
+export default function create(): Promise<Indicator> {
   const scene = new Scene()
   scene.background = new Color(0xf9fafb)
 
@@ -23,17 +18,16 @@ export default function attach(width: number, height: number): Indicator {
   directionalLight.position.set(1, 1, 1)
   scene.add(directionalLight)
 
-  const camera = new PerspectiveCamera(50, width / height, 0.1, 1000)
+  const camera = new PerspectiveCamera()
   camera.position.z = 5
 
   const renderer = new WebGLRenderer({ antialias: true })
-  renderer.setSize(width, height)
 
   renderer.setAnimationLoop(() => {
     renderer.render(scene, camera)
   })
 
-  return {
+  return Promise.resolve({
     dom: renderer.domElement,
     react: ([acc, euler]) => {
       rotate(euler)
@@ -48,5 +42,5 @@ export default function attach(width: number, height: number): Indicator {
       dispose()
       renderer.dispose()
     }
-  }
+  })
 }

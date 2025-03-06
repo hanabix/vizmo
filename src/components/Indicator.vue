@@ -5,7 +5,8 @@ import * as THREE from 'three'
 import type { Meters } from '../modules/wit-motion'
 import { complain } from '../modules/utils'
 
-const containerRef = ref<HTMLDivElement>()
+const containerRef = ref<HTMLElement>()
+const disposeRef = ref<() => void>(() => { })
 const data = inject(Key.meters) ?? complain('failed to inject meters')
 const cache = inject(Key.indicators) ?? complain('failed to inject indicators')
 const convert: (m: Meters) => [THREE.Vector3, THREE.Euler] = ([acc, _, rot]) => {
@@ -13,16 +14,20 @@ const convert: (m: Meters) => [THREE.Vector3, THREE.Euler] = ([acc, _, rot]) => 
   return [(new THREE.Vector3(...acc)), (new THREE.Euler(y, z, x, 'YXZ'))]
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (!containerRef.value) throw new Error('containerRef is undefined')
 
-  const { react: refresh, dispose } = cache.attach(containerRef.value)
-  const update: (m: Meters) => void = combine(convert,  refresh)
+  const { react, dispose } = await cache.attach(containerRef.value)
+  disposeRef.value = dispose
+
+  const update: (m: Meters) => void = combine(convert, react)
 
   update(data.value)
   watch(data, update)
 
-  onBeforeUnmount(dispose)
+})
+onBeforeUnmount(() => {
+  disposeRef.value()
 })
 
 

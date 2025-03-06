@@ -46,4 +46,3 @@ provide(Key.indicators, cacheBy(createIndicator))
   <GitHubCorner />
 
 </template>
-./views

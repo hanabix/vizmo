@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { agents } from '../modules/agent'
 import { gather } from '../modules/gather'
-import { Rate, hz } from '../modules/wit-motion'
+import { Rate, hz, type Meters } from '../modules/wit-motion'
 import type { To } from './'
 import Panel from '../components/Panel.vue'
 import Status from '../components/Status.vue'
@@ -10,6 +10,8 @@ import Instantly from '../components/Instantly.vue'
 import Indicator from '../components/Indicator.vue'
 import MTable from '../components/MetersTable.vue'
 import Toolbar from '../components/Toolbar.vue'
+import Vector3Line from '../components/Vector3Line.vue'
+
 
 const { to } = defineProps<{
   to: To<'Playback'>
@@ -62,6 +64,8 @@ onMounted(async () => {
           <Instantly v-if="agent.sensor" :watch="agent.sensor.watch">
             <Indicator class="mt-4" />
             <MTable class="mt-4" />
+            <Vector3Line class="mt-4" :mask="(m: Meters) => m[0]" />
+            <!-- <Vector3Line class="mt-4" :mask="(m) => m[1]" /> -->
           </Instantly>
 
           <div v-else class="text-blue-500 mt-4 p-1 rounded-lg hover:bg-gray-50 flex items-center justify-center">

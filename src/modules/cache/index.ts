@@ -1,19 +1,19 @@
 import type { Disposable, Canvas } from "../types"
 
 export interface Cache<T extends Canvas<any>> extends Disposable {
-  attach(root: HTMLElement): T
+  attach(root: HTMLElement): Promise<T>
 }
 
-export default function cache<T extends Canvas<any>>(factory: (width: number, height: number) => T): Cache<T> {
+export default function cache<T extends Canvas<any>>(factory: () => Promise<T>): Cache<T> {
   const instances: T[] = []
   const attached = new Set<T>()
   let disposed = false
 
   return {
-    attach(root: HTMLElement): T {
+    async attach(root: HTMLElement): Promise<T> {
       if (disposed) throw new Error("Cache already disposed")
 
-      const instance = instances.length > 0 ? instances.pop()! : factory(root.clientWidth, root.clientHeight)
+      const instance =  instances.length > 0 ? instances.pop()! : await factory()
       const resize = () => { instance.resize(root.clientWidth, root.clientHeight) }
 
       if (instance.dom.parentElement) {
@@ -22,6 +22,7 @@ export default function cache<T extends Canvas<any>>(factory: (width: number, he
 
       attached.add(instance)
       root.appendChild(instance.dom)
+      resize()
       window.addEventListener('resize', resize)
 
       return rewrite(instance)

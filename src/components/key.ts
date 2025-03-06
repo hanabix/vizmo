@@ -5,5 +5,6 @@ import type { Cache } from '../modules/cache'
 
 export default {
   meters: Symbol('meters') as InjectionKey<ShallowRef<Meters>>,
-  indicators: Symbol('indicators') as InjectionKey<Cache<Indicator>>
+  spike: Symbol('spike') as InjectionKey<ShallowRef<number>>,
+  indicators: Symbol('indicators') as InjectionKey<Cache<Indicator>>,
 }
