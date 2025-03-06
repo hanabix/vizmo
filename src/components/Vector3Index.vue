@@ -1,28 +1,29 @@
 <script setup lang="ts">
-import { onMounted, ref, watch, inject, onBeforeUnmount } from 'vue'
+import { onMounted, ref, inject, onBeforeUnmount } from 'vue'
 import { complain } from '../modules/utils'
-import type { Meters, Triple } from '../modules/wit-motion'
+import type { Triple } from '../modules/wit-motion'
 import plot from '../modules/plot'
 import Key from './key'
 
-const { mask } = defineProps<{
-  mask: (m: Meters) => Triple
+const { data } = defineProps<{
+  data: Triple[],
 }>()
 
 const container = ref<HTMLElement>()
 const disposeRef = ref<() => void>(() => { })
-const meters = inject(Key.meters) ?? complain('failed to inject meters')
-const data: Triple[] = []
+const spike = inject(Key.spike) ?? complain('failed to inject spike')
 
 onMounted(async () => {
   if (!container.value) return
 
-  const { react, dispose } = await plot(container.value)
+  const { react, dispose, on } = await plot(container.value)
   disposeRef.value = dispose
+  react(data)
 
-  watch(meters, (m) => {
-    data.push(mask(m))
-    react(data)
+  on('plotly_click', (data) => {
+    if (data.points && data.points.length > 0) {
+      spike.value = data.points[0].pointIndex
+    }
   })
 
 })

@@ -11,6 +11,7 @@ const cancel = watch((v) => meters.value = v)
 
 provide(Key.meters, shallowReadonly(meters))
 onBeforeUnmount(() => cancel())
+
 </script>
 
 <template>

@@ -7,7 +7,6 @@ import Status from '../components/Status.vue'
 import Instantly from '../components/Instantly.vue'
 import Indicator from '../components/Indicator.vue'
 import MTable from '../components/MetersTable.vue'
-import AccelChart from '../components/Vector3Line.vue'
 import Toolbar from '../components/Toolbar.vue'
 import type { To } from '.'
 
@@ -42,7 +41,6 @@ const buttons = computed(() => agents.value.filter((a) => a.sensor).length == 0 
           <Instantly v-if="agent.sensor" :watch="agent.sensor.watch">
             <Indicator class="mt-4" />
             <MTable class="mt-4" />
-            <AccelChart class="mt-4" />
           </Instantly>
 
           <div v-else class="text-blue-500 mt-4 p-1 rounded-lg hover:bg-gray-50 flex items-center justify-center">
