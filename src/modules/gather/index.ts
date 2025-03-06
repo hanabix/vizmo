@@ -1,7 +1,7 @@
 import { ref } from "vue";
+import type { Cancel } from "../types";
 import { type Meters } from "../wit-motion";
 import type { Agent } from "../agent";
-import type { Cancel } from "../port";
 
 const log = ref<Log>({
   timestamp: new Date(),

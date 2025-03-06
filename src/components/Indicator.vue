@@ -2,12 +2,12 @@
 import { ref, onMounted, onBeforeUnmount, inject, watch } from 'vue'
 import Key from './key'
 import * as THREE from 'three'
-import attach from '../modules/indicator'
 import type { Meters } from '../modules/wit-motion'
 import { complain } from '../modules/utils'
 
 const containerRef = ref<HTMLDivElement>()
-const data = inject(Key.meters) ?? complain('failed to inject metersRef')
+const data = inject(Key.meters) ?? complain('failed to inject meters')
+const cache = inject(Key.indicators) ?? complain('failed to inject indicators')
 const convert: (m: Meters) => [THREE.Vector3, THREE.Euler] = ([acc, _, rot]) => {
   const [x, y, z] = rot.map(v => v * Math.PI / 180)
   return [(new THREE.Vector3(...acc)), (new THREE.Euler(y, z, x, 'YXZ'))]
@@ -16,13 +16,12 @@ const convert: (m: Meters) => [THREE.Vector3, THREE.Euler] = ([acc, _, rot]) => 
 onMounted(() => {
   if (!containerRef.value) throw new Error('containerRef is undefined')
 
-  const { refresh, resize, dispose } = attach(containerRef.value)
-  const update: (m: Meters) => void = combine(convert, (b) => refresh(...b))
+  const { react: refresh, dispose } = cache.attach(containerRef.value)
+  const update: (m: Meters) => void = combine(convert,  refresh)
 
   update(data.value)
   watch(data, update)
 
-  window.addEventListener('resize', () => resize())
   onBeforeUnmount(dispose)
 })
 
