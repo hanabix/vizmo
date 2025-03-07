@@ -1,4 +1,5 @@
-import type { Cancel, Compound, SegmentFilter, Readable, UUIDs } from "../port"
+import type { Cancel } from "../types"
+import type { Compound, SegmentFilter, Readable, UUIDs } from "../port"
 import portOf from "../port"
 import props, { type Feature, type Features, type Setting, type Settings } from "./props"
 import meters, { type Meters } from "./meters"
