@@ -1,5 +1,5 @@
-import type { PlotlyHTMLElement, PlotData, Layout, Config } from 'plotly.js-dist-min'
-import { newPlot, react, purge } from 'plotly.js-dist-min'
+import type { PlotlyHTMLElement, PlotData, Layout, Config } from 'plotly.js-basic-dist-min'
+import { newPlot, react, purge } from 'plotly.js-basic-dist-min'
 import type { Disposable } from '../types'
 
 export interface Vector3Plot extends Disposable, Pick<PlotlyHTMLElement, 'on'> {

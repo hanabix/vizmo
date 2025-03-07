@@ -10,6 +10,18 @@ export default defineConfig({
     )
   },
   base: './',
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'material-icons': ['@material-design-icons/font'],
+          'plotly': ['plotly.js-basic-dist-min'],
+          'three': ['three']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
+  },
   plugins: [
     tailwindcss(),
     vue(),
@@ -33,6 +45,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024
       },
 
       devOptions: {
@@ -42,5 +55,5 @@ export default defineConfig({
         type: 'module',
       },
     })
-  ]
+  ],
 })
